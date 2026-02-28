@@ -29,6 +29,10 @@ export default defineConfig({
         // separately from app code. Users only re-download changed chunks.
         manualChunks(id) {
           if (id.includes('node_modules')) {
+            // Icons — loaded by many pages, cache separately
+            if (id.includes('lucide-react') || id.includes('@fortawesome')) {
+              return 'vendor-icons';
+            }
             // Core React ecosystem — cached long-term, changes rarely
             if (id.includes('react') && !id.includes('recharts') && !id.includes('framer')) {
               return 'vendor-react';
@@ -44,10 +48,6 @@ export default defineConfig({
             // Charts — only loaded when chart pages are visited
             if (id.includes('recharts') || id.includes('d3-')) {
               return 'vendor-charts';
-            }
-            // Icons — loaded by many pages, cache separately
-            if (id.includes('lucide-react') || id.includes('@fortawesome')) {
-              return 'vendor-icons';
             }
             // Everything else (axios, etc.)
             return 'vendor';
