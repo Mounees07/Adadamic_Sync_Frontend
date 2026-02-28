@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import DashboardLayout from '../components/DashboardLayout';
 import {
     User, Mail, Phone, MapPin, Calendar, BookOpen,
-    ShieldCheck, Activity, Edit2, Save, X, Briefcase, GraduationCap
+    ShieldCheck, ClipboardList, Edit2, Save, X, Briefcase, GraduationCap
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -229,7 +229,7 @@ const MyProfile = () => {
                     {/* Account Status Card */}
                     <div style={{ padding: '1.5rem', borderRadius: '1.5rem', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', border: '1px solid rgba(229, 231, 235, 0.5)', background: 'var(--bg-card)' }}>
                         <h3 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-primary)' }}>
-                            <Activity size={20} className="text-emerald-500" />
+                            <ClipboardList size={20} className="text-emerald-500" />
                             Account Status
                         </h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -371,7 +371,7 @@ const MyProfile = () => {
                     {/* ADMISSION PAYMENT DETAILS */}
                     {activeTab === 'Admission' && (
                         <div className="animate-fade-in">
-                            <SectionCard title="ADMISSION PAYMENT DETAILS" icon={Activity} iconColor="text-green-500">
+                            <SectionCard title="ADMISSION PAYMENT DETAILS" icon={ClipboardList} iconColor="text-green-500">
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                                     <InfoRow label="DTE Register No" value={profile.dteRegisterNo} />
                                     <InfoRow label="DTE Admission No" value={profile.dteAdmissionNo} />
