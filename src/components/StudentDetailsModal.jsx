@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Save, User, BookOpen, Activity, MapPin, Briefcase, GraduationCap, Calendar } from 'lucide-react';
+import { X, Save, User, BookOpen,  ClipboardList, MapPin, Briefcase, GraduationCap, Calendar } from 'lucide-react';
 import './StudentDetailsModal.css';
 
 // Component definitions moved outside to prevent re-rendering issues
@@ -62,7 +62,7 @@ const StudentDetailsModal = ({ student, mode, onClose, onSave }) => {
     const tabs = [
         { id: 'Personal', label: 'Personal', icon: User },
         { id: 'Academic', label: 'Academic', icon: BookOpen },
-        { id: 'Admission', label: 'Admission', icon: Activity },
+        { id: 'Admission', label: 'Admission', icon: ClipboardList },
         { id: 'Address', label: 'Address', icon: MapPin },
         { id: 'Hostel', label: 'Hostel', icon: Briefcase },
         { id: 'School', label: 'School', icon: GraduationCap },
@@ -135,7 +135,7 @@ const StudentDetailsModal = ({ student, mode, onClose, onSave }) => {
                         )}
 
                         {activeTab === 'Admission' && (
-                            <Section title="Admission Details" icon={Activity}>
+                            <Section title="Admission Details" icon={ClipboardList}>
                                 <InputField label="Admission No" name="admissionNo" formData={formData} onChange={handleChange} />
                                 <InputField label="Admission Year" name="admissionYear" formData={formData} onChange={handleChange} />
                                 <InputField label="DTE Register No" name="dteRegisterNo" formData={formData} onChange={handleChange} />
