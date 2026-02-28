@@ -1,0 +1,34 @@
+/* Sidebar.css - SchoolHub Design Clean Up */
+
+/* Remove default heavy styles, allow utility classes to control layout */
+.sidebar {
+    /* Minimal shadow for depth */
+    box-shadow: 1px 0 10px rgba(0, 0, 0, 0.03);
+}
+
+/* Logo Badge Animation */
+.logo-badge {
+    animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-3px);
+    }
+}
+
+/* Hide Scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

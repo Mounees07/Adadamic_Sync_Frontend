@@ -1,0 +1,670 @@
+/* ══════════════════════════════════════════════
+   Gate Security — Single Unified View
+══════════════════════════════════════════════ */
+
+.ge-wrap {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ── Page Title ── */
+.ge-head {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+
+.ge-head h1 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.35rem;
+}
+
+.ge-head p {
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+/* ── Main Card ── */
+.ge-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 18px;
+    padding: 1.5rem 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ══════════════════════════════════════════════
+   TOP BAR: Date controls + Roll search
+══════════════════════════════════════════════ */
+.ge-topbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+/* Date area */
+.ge-date-area {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.ge-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+
+.ge-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ge-icon-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.ge-refresh {
+    color: var(--text-secondary);
+}
+
+.ge-refresh:hover {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.spinning svg {
+    animation: ge-spin 0.8s linear infinite;
+}
+
+@keyframes ge-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Date picker */
+.ge-date-picker-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.ge-date-cal-icon {
+    position: absolute;
+    left: 9px;
+    color: var(--primary);
+    pointer-events: none;
+}
+
+.ge-date-input {
+    padding: 0.45rem 0.75rem 0.45rem 2rem;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.07);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.ge-date-input:focus {
+    border-color: var(--primary);
+}
+
+.ge-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.45);
+    cursor: pointer;
+}
+
+.ge-date-label-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.ge-date-label {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.ge-today-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    background: rgba(99, 102, 241, 0.18);
+    color: var(--primary);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    letter-spacing: 0.3px;
+}
+
+/* Roll / Name search */
+.ge-search-area {
+    flex: 1;
+    min-width: 200px;
+    max-width: 340px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+
+.ge-search-icon {
+    position: absolute;
+    left: 11px;
+    color: var(--text-secondary);
+    pointer-events: none;
+}
+
+.ge-search-input {
+    width: 100%;
+    padding: 0.5rem 2.25rem 0.5rem 2.25rem;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.ge-search-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.ge-search-input:focus {
+    border-color: var(--primary);
+}
+
+.ge-clear-btn {
+    position: absolute;
+    right: 9px;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    padding: 2px;
+    border-radius: 4px;
+    transition: color 0.2s;
+}
+
+.ge-clear-btn:hover {
+    color: var(--text-primary);
+}
+
+.ge-search-spinner {
+    position: absolute;
+    left: 11px;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: ge-spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+
+/* ══════════════════════════════════════════════
+   FILTER ROW
+══════════════════════════════════════════════ */
+.ge-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ge-filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.35rem 0.9rem;
+    border-radius: 100px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ge-filter-chip:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+.ge-count {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 100px;
+    padding: 1px 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.ge-result-count {
+    margin-left: auto;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.ge-result-count strong {
+    color: var(--text-primary);
+}
+
+/* ══════════════════════════════════════════════
+   ERRORS / LOADING / EMPTY
+══════════════════════════════════════════════ */
+.ge-banner {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+}
+
+.ge-banner-error {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.22);
+}
+
+.ge-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 3rem;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.ge-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid rgba(255, 255, 255, 0.08);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: ge-spin 0.75s linear infinite;
+}
+
+.ge-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3.5rem 1rem;
+    text-align: center;
+    gap: 0.5rem;
+}
+
+.ge-empty-icon {
+    color: var(--text-secondary);
+    opacity: 0.25;
+    margin-bottom: 0.5rem;
+}
+
+.ge-empty h3 {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.ge-empty p {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    margin: 0;
+}
+
+.ge-empty-hint {
+    color: var(--text-secondary);
+    font-size: 0.76rem !important;
+    opacity: 0.65;
+    margin-top: 2px !important;
+}
+
+/* ── Null / Prompt State ── */
+.ge-null-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3.5rem 1rem;
+    text-align: center;
+    gap: 0.6rem;
+}
+
+.ge-null-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.22);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    margin-bottom: 0.5rem;
+}
+
+.ge-null-state h3 {
+    color: var(--text-primary);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.ge-null-state p {
+    color: var(--text-secondary);
+    font-size: 0.83rem;
+    max-width: 380px;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ══════════════════════════════════════════════
+   LEAVE LIST
+══════════════════════════════════════════════ */
+.ge-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* ── Leave Row ── */
+.ge-row {
+    display: grid;
+    grid-template-columns: 56px 200px 1fr auto auto;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.1rem 1.25rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-left-width: 3px;
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.ge-row:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.22);
+    transform: translateX(2px);
+}
+
+.ge-row-out {
+    border-left-color: #ef4444;
+}
+
+.ge-row-pending {
+    border-left-color: #818cf8;
+}
+
+.ge-row-returned {
+    border-left-color: #10b981;
+}
+
+/* Avatar */
+.ge-row-avatar {
+    flex-shrink: 0;
+}
+
+.ge-avatar-img {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--primary);
+}
+
+.ge-avatar-ph {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.07);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-secondary);
+}
+
+/* Identity */
+.ge-row-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.ge-row-name {
+    font-size: 0.95rem;
+    font-weight: 650;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ge-row-roll {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.22);
+    border-radius: 6px;
+    padding: 2px 7px;
+    letter-spacing: 0.4px;
+    margin-bottom: 2px;
+}
+
+.ge-row-dept {
+    font-size: 0.73rem;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+/* Status chip */
+.ge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 9px;
+    border-radius: 100px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.35px;
+    width: fit-content;
+}
+
+@keyframes ge-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+}
+
+/* Info pairs */
+.ge-row-info,
+.ge-row-times {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ge-info-pair {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.ge-info-label {
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    min-width: 72px;
+    flex-shrink: 0;
+}
+
+.ge-info-val {
+    color: var(--text-primary);
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.ge-reason {
+    color: var(--text-secondary);
+    font-weight: 400;
+    font-style: italic;
+    max-width: 180px;
+}
+
+.ge-t-planned {
+    color: #818cf8;
+}
+
+.ge-t-exit {
+    color: #f97316;
+}
+
+.ge-t-return {
+    color: #10b981;
+}
+
+/* Action */
+.ge-row-action {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-shrink: 0;
+}
+
+.ge-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0.5rem 1.1rem;
+    border-radius: 9px;
+    border: none;
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    white-space: nowrap;
+}
+
+.ge-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.ge-action-exit {
+    background: #ef4444;
+    color: #fff;
+}
+
+.ge-action-return {
+    background: #10b981;
+    color: #fff;
+}
+
+.ge-done {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #10b981;
+}
+
+/* ══════════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════════ */
+@media (max-width: 900px) {
+    .ge-row {
+        grid-template-columns: 48px 1fr auto;
+        grid-template-rows: auto auto auto;
+    }
+
+    .ge-row-avatar {
+        grid-row: 1;
+        grid-column: 1;
+    }
+
+    .ge-row-identity {
+        grid-row: 1;
+        grid-column: 2;
+    }
+
+    .ge-row-action {
+        grid-row: 1;
+        grid-column: 3;
+    }
+
+    .ge-row-info {
+        grid-row: 2;
+        grid-column: 1 / 4;
+    }
+
+    .ge-row-times {
+        grid-row: 3;
+        grid-column: 1 / 4;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.5rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .ge-wrap {
+        padding: 1rem;
+    }
+
+    .ge-topbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .ge-search-area {
+        max-width: 100%;
+        margin-left: 0;
+    }
+
+    .ge-date-label {
+        display: none;
+    }
+}

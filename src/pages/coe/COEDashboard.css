@@ -1,0 +1,201 @@
+/* COEDashboard.css - Custom styling for COE Dashboard matching screenshot */
+
+.coe-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.coe-stat-card {
+    background: var(--bg-card, #121212);
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.05));
+    border-top-width: 3px;
+    /* Controlled via inline style for dynamic color */
+}
+
+.coe-stat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary, #a1a1aa);
+}
+
+.coe-stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary, #fff);
+    margin-top: 1.5rem;
+}
+
+/* Enhancing the table to match dark, sleek look */
+.coe-dash-card {
+    background: var(--bg-card, #121212);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.05));
+    margin-bottom: 2rem;
+}
+
+.coe-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.coe-card-header h3 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.coe-view-all {
+    background: var(--bg-subtle);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.coe-view-all:hover {
+    background: var(--glass-border);
+}
+
+.coe-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.coe-table th,
+.coe-table td {
+    padding: 12px 0;
+    text-align: left;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--glass-border, rgba(255, 255, 255, 0.05));
+    color: var(--text-primary, #eaeaea);
+}
+
+.coe-table th {
+    color: var(--text-muted, #71717a);
+    font-weight: 500;
+    border-bottom-width: 2px;
+}
+
+.coe-table tr:last-child td {
+    border-bottom: none;
+}
+
+.coe-status-pill {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #fff);
+    font-size: 0.7rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* Recent Activity specific styling */
+.coe-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.coe-timeline-item {
+    display: flex;
+    gap: 12px;
+}
+
+.coe-dot {
+    width: 8px;
+    height: 8px;
+    background-color: #3b82f6;
+    /* Blue dot from screenshot */
+    border-radius: 50%;
+    margin-top: 6px;
+    flex-shrink: 0;
+}
+
+.coe-act-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.coe-act-detail {
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.coe-act-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* User Profile card matching * /
+/* .profile-summary-card is already okay but let's tweak slightly for COE */
+.coe-profile-card {
+    background: var(--bg-card, #121212);
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.05));
+    margin-bottom: 2rem;
+}
+
+.coe-avatar {
+    width: 64px;
+    height: 64px;
+    background: #18181b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 auto 1.5rem;
+}
+
+.coe-profile-name {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text-primary, #fff);
+}
+
+.coe-role-line {
+    font-size: 0.8rem;
+    color: var(--text-muted, #71717a);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.coe-status-circle {
+    width: 6px;
+    height: 6px;
+    background-color: #10b981;
+    border-radius: 50%;
+}

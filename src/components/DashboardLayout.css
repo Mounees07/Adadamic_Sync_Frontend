@@ -1,0 +1,71 @@
+.dashboard-container {
+    min-height: 100vh;
+    background-color: var(--bg-deep);
+    position: relative;
+}
+
+.main-content {
+    margin-left: 160px;
+    /* Increased gap for airy look */
+    padding-top: 32px;
+    /* Reduced padding since navbar is less dominant or handled differently */
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    transition: margin-left 0.3s ease;
+}
+
+.page-content {
+    padding: 32px;
+    margin: 0;
+    max-width: 1600px;
+    /* Allow wider content */
+    width: 100%;
+}
+
+.page-logo-container {
+    position: fixed;
+    top: 24px;
+    left: 36px;
+    /* Centered over the 72px sidebar (24px + 12px offset = 36px). Wait. 72/2=36. Left 24. Center 60. Logo 48. Center 24. Logo left = 60-24=36. Perfect. */
+    /* Centered over the 80px sidebar (24px + 16px offset) */
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    z-index: 1200;
+}
+
+.logo-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    background: #6366f1;
+    border-radius: 14px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.logo-text-main {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+}
+
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+        /* Navbar is still fixed top, so we keep padding-top */
+    }
+
+    .page-content {
+        padding: 20px;
+    }
+
+    .page-logo-container {
+        display: none;
+        /* Hide on mobile as sidebar might change behavior or rely on top navbar */
+    }
+}

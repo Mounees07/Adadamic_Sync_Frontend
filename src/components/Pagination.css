@@ -1,0 +1,81 @@
+/* Pagination.css */
+
+.pagination-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    background: transparent;
+    font-family: var(--font-main, 'Inter', sans-serif);
+}
+
+.pagination-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0;
+    /* Hide text "PREV"/"NEXT" if icon is sufficient, or adjust */
+    padding: 0;
+}
+
+/* If we want to keep the text 'PREV'/'NEXT' we need to adjust */
+.pagination-btn span {
+    display: none;
+    /* Hide text to match Admin.css style which uses icons */
+}
+
+.pagination-btn svg {
+    display: block;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-numbers {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pagination-number {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.pagination-number:hover {
+    background-color: var(--bg-subtle);
+}
+
+.pagination-number.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+    box-shadow: 0 4px 10px var(--primary-glow);
+}

@@ -1,0 +1,144 @@
+.student-assignments-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.filter-select {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 8px 16px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.assignments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.assignment-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-left: 4px solid transparent;
+}
+
+.assignment-item.status-pending {
+    border-left-color: var(--warning);
+}
+
+.assignment-item.status-overdue {
+    border-left-color: var(--danger);
+}
+
+.assignment-item.status-submitted {
+    border-left-color: var(--success);
+}
+
+.assignment-left {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-subtle);
+}
+
+.status-indicator.pending {
+    color: var(--warning);
+}
+
+.status-indicator.overdue {
+    color: var(--danger);
+}
+
+.status-indicator.submitted {
+    color: var(--success);
+}
+
+.assignment-info h4 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+}
+
+.assignment-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.course-tag {
+    background: rgba(99, 102, 241, 0.2);
+    color: var(--primary);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.due-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.assignment-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.submitted-badge {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--success);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.grade-badge {
+    background: rgba(139, 92, 246, 0.2);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    border: 1px dashed var(--glass-border);
+}
+
+@media (max-width: 768px) {
+    .assignment-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .assignment-right {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}
