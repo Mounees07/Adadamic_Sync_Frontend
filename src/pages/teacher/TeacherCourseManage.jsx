@@ -501,7 +501,7 @@ const TeacherCourseManage = () => {
                     {/* RIGHT PANEL */}
                     <div className="otp-panel right">
                         <div className="otp-header">
-                            <h3 className="otp-header-title">Live Activity Feed</h3>
+                            <h3 className="otp-header-title">Live ClipboardList Feed</h3>
                             <div className="otp-header-actions">
                                 Auto-updating <Clock size={14} className="animate-spin-slow" />
                             </div>

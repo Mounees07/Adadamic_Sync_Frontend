@@ -416,7 +416,7 @@ const MentorDashboard = () => {
             return recentInteractions.some(interaction => String(interaction.menteeId) === String(mentee.id));
         }
 
-        if (activeMenteeFilter === 'No recent activity') {
+        if (activeMenteeFilter === 'No recent ClipboardList') {
             return !recentInteractions.some(interaction => String(interaction.menteeId) === String(mentee.id));
         }
 
@@ -1383,7 +1383,7 @@ const MentorDashboard = () => {
             'ACADEMIC': 'yellow',
             'ADMIN': 'gray',
             'REVIEW': 'blue',
-            'GROUP ACTIVITY': 'yellow',
+            'GROUP ClipboardList': 'yellow',
             'DONE': 'green'
         };
         return mapping[labelName] || 'gray';
@@ -1572,7 +1572,7 @@ const MentorDashboard = () => {
                     </div>
 
                     <div className="mw-filters">
-                        {['All', 'Action required', 'Recent meetings', 'No recent activity'].map(filter => (
+                        {['All', 'Action required', 'Recent meetings', 'No recent ClipboardList'].map(filter => (
                             <button
                                 key={filter}
                                 onClick={() => setActiveMenteeFilter(filter)}
@@ -1745,10 +1745,10 @@ const MentorDashboard = () => {
                     </div>
                 </div>
 
-                {/* Mentoring Activity */}
+                {/* Mentoring ClipboardList */}
                 <div className="mw-card custom-flex-grow">
                     <div className="mw-card-header">
-                        <h2>Mentoring activity</h2>
+                        <h2>Mentoring ClipboardList</h2>
                         <p>Recent notes and sessions with your mentees</p>
                     </div>
 
@@ -1757,7 +1757,7 @@ const MentorDashboard = () => {
                             <div className="timeline-item">
                                 <div className="timeline-dot"></div>
                                 <div className="timeline-content">
-                                    <h4>No recent activity</h4>
+                                    <h4>No recent ClipboardList</h4>
                                     <p>Your logged interactions will appear here</p>
                                 </div>
                             </div>
@@ -1973,10 +1973,10 @@ const MentorDashboard = () => {
                     </div>
                 </div>
 
-                {/* Teaching Activity */}
+                {/* Teaching ClipboardList */}
                 <div className="mw-card custom-flex-grow">
                     <div className="mw-card-header">
-                        <h2>Teaching activity</h2>
+                        <h2>Teaching ClipboardList</h2>
                         <p>Recent actions across your courses</p>
                     </div>
 

@@ -7,7 +7,7 @@ import {
     ArrowUp,
     ArrowDown,
     Calendar,
-    Activity
+    ClipboardList
 } from 'lucide-react';
 import {
     AreaChart,
@@ -55,7 +55,7 @@ const HODAnalytics = () => {
 
     if (loading) return (
         <div className="analytics-container flex justify-center items-center h-screen">
-            <div className="text-indigo-500 animate-spin"><Activity size={48} /></div>
+            <div className="text-indigo-500 animate-spin"><ClipboardList size={48} /></div>
         </div>
     );
 
@@ -99,7 +99,7 @@ const HODAnalytics = () => {
                 </div>
                 <div className="kpi-card">
                     <div className="kpi-icon" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10b981' }}>
-                        <Activity size={24} />
+                        <ClipboardList size={24} />
                     </div>
                     <div className="kpi-info">
                         <span className="kpi-value">{data.currentAvgAttendance}%</span>
@@ -168,7 +168,7 @@ const HODAnalytics = () => {
                 <div className="chart-card">
                     <div className="chart-header">
                         <h3 className="chart-title">
-                            <Activity className="text-emerald-500" size={20} />
+                            <ClipboardList className="text-emerald-500" size={20} />
                             Attendance by Year
                         </h3>
                     </div>

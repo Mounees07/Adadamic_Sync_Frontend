@@ -8,7 +8,7 @@ import {
     Globe,
     ToggleLeft,
     ToggleRight,
-    Activity,
+    ClipboardList,
     Mail,
     Lock,
     Clock,
@@ -189,7 +189,7 @@ const AdminSettings = () => {
         { id: 'security', label: 'Security', icon: <Shield size={20} /> },
         { id: 'features', label: 'Features', icon: <Database size={20} /> },
         { id: 'env', label: 'Environment', icon: <Server size={20} /> },
-        { id: 'logs', label: 'Audit Logs', icon: <Activity size={20} /> }
+        { id: 'logs', label: 'Audit Logs', icon: <ClipboardList size={20} /> }
     ];
 
     const InputField = ({ label, name, type = "text", value, onChange, icon: Icon, placeholder }) => (
@@ -562,7 +562,7 @@ const AdminSettings = () => {
                         <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }} className="animate-fade-in">
                             <div className="settings-header" style={{ marginBottom: '24px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '16px' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                    <Activity size={24} color="#7c6bdc" />
+                                    <ClipboardList size={24} color="#7c6bdc" />
                                     <h3 style={{ fontSize: '1.25rem', fontWeight: '700', color: 'var(--text-primary)', margin: 0 }}>System Audit Trail</h3>
                                 </div>
                                 <button style={{ border: 'none', background: 'none', color: '#7c6bdc', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem' }}>
@@ -605,9 +605,9 @@ const AuditLogViewer = () => {
         fetchLogs();
     }, []);
 
-    if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>Loading activity logs...</div>;
+    if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>Loading ClipboardList logs...</div>;
 
-    if (logs.length === 0) return <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>No recent activity found.</div>;
+    if (logs.length === 0) return <div style={{ padding: '40px', textAlign: 'center', color: '#A098AE' }}>No recent ClipboardList found.</div>;
 
     return (
         <div className="audit-table-wrapper">

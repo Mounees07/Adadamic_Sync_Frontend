@@ -20,7 +20,7 @@ import { calculateAttendance } from '../utils/attendanceUtils';
 const DashboardOverview = () => {
     const { currentUser, userData: authUserData } = useAuth();
     const [studentProfile, setStudentProfile] = useState(null);
-    const [recentActivity, setRecentActivity] = useState([]);
+    const [recentClipboardList, setRecentClipboardList] = useState([]);
     const [sgpaHistory, setSgpaHistory] = useState([]);
     const [loading, setLoading] = useState(true);
     const [dashboardStats, setDashboardStats] = useState({
@@ -78,7 +78,7 @@ const DashboardOverview = () => {
                     currentSgpa = Number(userRes.data.sgpa).toFixed(2);
                 }
 
-                // --- Process Recent Activity ---
+                // --- Process Recent ClipboardList ---
                 const activities = [];
 
                 attRes.data.forEach(att => {
@@ -103,7 +103,7 @@ const DashboardOverview = () => {
                     .sort((a, b) => b.timestamp - a.timestamp)
                     .slice(0, 5);
 
-                setRecentActivity(sortedActivities);
+                setRecentClipboardList(sortedActivities);
 
                 // ── Fetch section assignments in parallel ─────────────────────────────
                 const assignmentPromises = enrollments.map(e =>
@@ -430,16 +430,16 @@ const DashboardOverview = () => {
 
 
 
-                {/* 2. Recent Activity & Biometric Log */}
-                <div className="dash-card activity-card" style={{ marginTop: '20px' }}>
+                {/* 2. Recent ClipboardList & Biometric Log */}
+                <div className="dash-card ClipboardList-card" style={{ marginTop: '20px' }}>
                     <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                        <h3>Biometric & Recent Activity</h3>
+                        <h3>Biometric & Recent ClipboardList</h3>
                         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: '4px' }}>Last 5 Updates</span>
                     </div>
 
                     <div className="timeline-list">
-                        {recentActivity.length > 0 ? (
-                            recentActivity.map((item, idx) => (
+                        {recentClipboardList.length > 0 ? (
+                            recentClipboardList.map((item, idx) => (
                                 <div key={idx} className="timeline-item">
                                     <div className={`t-dot ${item.type === 'attendance' ? 'green' : item.type === 'submission' ? 'purple' : 'blue'}`}></div>
                                     <div className="t-content">
@@ -463,7 +463,7 @@ const DashboardOverview = () => {
                                 </div>
                             ))
                         ) : (
-                            <div className="empty-activity" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>No recent activity found.</div>
+                            <div className="empty-ClipboardList" style={{ textAlign: 'center', padding: '32px', color: 'var(--text-muted)', fontSize: '0.9rem' }}>No recent ClipboardList found.</div>
                         )}
                     </div>
                 </div>

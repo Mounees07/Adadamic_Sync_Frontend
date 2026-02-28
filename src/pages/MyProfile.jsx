@@ -568,7 +568,7 @@ const MyProfile = () => {
                     {/* BIT ACADEMIC DETAILS */}
                     {activeTab === 'Institute' && (
                         <div className="animate-fade-in">
-                            <SectionCard title="BIT ACADEMIC DETAILS" icon={Activity} iconColor="text-red-500">
+                            <SectionCard title="BIT ACADEMIC DETAILS" icon={ClipboardList} iconColor="text-red-500">
                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
                                     <div className="space-y-3">
                                         <InfoRow label="TC Last Class Date" value={profile.tcLastClassDate} />

@@ -110,7 +110,7 @@
     text-transform: uppercase;
 }
 
-/* Recent Activity specific styling */
+/* Recent ClipboardList specific styling */
 .coe-timeline {
     display: flex;
     flex-direction: column;

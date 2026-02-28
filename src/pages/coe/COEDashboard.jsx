@@ -80,7 +80,7 @@ const COEDashboard = () => {
             }
         };
 
-        const fetchActivity = async () => {
+        const fetchClipboardList = async () => {
             try {
                 const [resultsRes, schedulesRes] = await Promise.all([
                     api.get('/results/recent-publications').catch(() => ({ data: [] })),
@@ -116,7 +116,7 @@ const COEDashboard = () => {
                     time: s.date, // Displaying event date
                     timestamp: s.id * 10000000, // Hack: Make schedule IDs weighty to show at top if we lack created_at, OR use ID sort combined with Result Date. 
                     // Better: Use Date.now() for "Just now" if we knew when it was uploaded. 
-                    // Since we don't, let's just use the event date as the "Activity Time" context, 
+                    // Since we don't, let's just use the event date as the "ClipboardList Time" context, 
                     // OR acknowledge we can't perfectly sort interleaved legacy data.
                     // Let's rely on the fact we fetched "Recent Uploads" (presumably new) and "Recent Results".
                     // A simple heuristic: mix them and sort by their primary date field.
@@ -155,12 +155,12 @@ const COEDashboard = () => {
                 setRecentActivities(formattedActivities);
 
             } catch (err) {
-                console.error("Failed to fetch activity", err);
+                console.error("Failed to fetch ClipboardList", err);
             }
         };
 
         fetchStats();
-        fetchActivity();
+        fetchClipboardList();
     }, []);
 
     const stats = [
@@ -263,10 +263,10 @@ const COEDashboard = () => {
                     </div>
                 </div>
 
-                {/* 2. Recent Activity */}
+                {/* 2. Recent ClipboardList */}
                 <div className="coe-dash-card">
                     <div className="coe-card-header" style={{ marginBottom: '1.25rem' }}>
-                        <h3>Recent Activity</h3>
+                        <h3>Recent ClipboardList</h3>
                     </div>
                     <div className="coe-timeline">
                         {recentActivities.map((act) => (
@@ -280,7 +280,7 @@ const COEDashboard = () => {
                             </div>
                         ))}
                         {recentActivities.length === 0 && (
-                            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No recent activity.</div>
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>No recent ClipboardList.</div>
                         )}
                     </div>
                 </div>
