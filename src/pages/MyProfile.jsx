@@ -26,7 +26,7 @@ const MyProfile = () => {
         try {
             setLoading(true);
             const token = await currentUser?.getIdToken();
-            const response = await axios.get('http://localhost:8080/api/users/profile', {
+            const response = await axios.get('${import.meta.env.VITE_API_URL}/api/users/profile', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             console.log("Profile Data Fetched:", response.data);
