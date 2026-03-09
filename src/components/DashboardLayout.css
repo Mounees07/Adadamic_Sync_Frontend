@@ -1,26 +1,30 @@
 .dashboard-container {
+    display: flex;
     min-height: 100vh;
     background-color: var(--bg-deep);
     position: relative;
+    width: 100%;
+    overflow-x: hidden;
 }
 
 .main-content {
-    margin-left: 160px;
-    /* Increased gap for airy look */
-    padding-top: 32px;
-    /* Reduced padding since navbar is less dominant or handled differently */
+    margin-left: 130px;
+    padding-top: 100px;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
+    position: relative;
     transition: margin-left 0.3s ease;
+    flex: 1;
+    min-width: 0;
 }
 
 .page-content {
-    padding: 32px;
+    padding: 24px;
     margin: 0;
     max-width: 1600px;
-    /* Allow wider content */
     width: 100%;
+    flex: 1;
 }
 
 .page-logo-container {
@@ -54,7 +58,7 @@
     letter-spacing: -0.5px;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .main-content {
         margin-left: 0;
         /* Navbar is still fixed top, so we keep padding-top */
@@ -67,5 +71,16 @@
     .page-logo-container {
         display: none;
         /* Hide on mobile as sidebar might change behavior or rely on top navbar */
+    }
+
+    .mobile-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 900;
+        backdrop-filter: blur(4px);
     }
 }

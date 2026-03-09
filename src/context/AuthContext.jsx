@@ -36,16 +36,8 @@ export const AuthProvider = ({ children }) => {
         setError("");
         try {
             const result = await signInWithEmailAndPassword(auth, email, password);
-            // Force immediate user data refresh after login
-            if (result.user) {
-                try {
-                    const response = await api.get(`/users/${result.user.uid}`);
-                    setUserData(response.data);
-                    console.log("✅ User data refreshed after login:", response.data);
-                } catch (err) {
-                    console.error("Failed to fetch user data after login:", err);
-                }
-            }
+            // Don't fetch userData here — onAuthStateChanged will fire automatically
+            // and fetch the user from backend (including UID-mismatch fallback for admin)
             return result;
         } catch (err) {
             setError(err.message);

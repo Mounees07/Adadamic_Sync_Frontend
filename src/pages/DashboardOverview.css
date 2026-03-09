@@ -8,7 +8,7 @@
     font-family: 'Inter', sans-serif;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
     .dashboard-layout-new {
         grid-template-columns: 1fr;
     }

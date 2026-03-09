@@ -19,9 +19,12 @@ const Login = () => {
     const handleGoogleLogin = async () => {
         try {
             await loginWithGoogle();
+            // Navigate to /dashboard — RoleBasedRedirect will wait for userData
+            // and then route to /admin/dashboard, /hod/dashboard, etc.
             navigate('/dashboard');
         } catch (err) {
             console.error("Google login failed:", err);
+            setFormError(err.message || 'Google login failed. Check your network connection.');
         }
     };
 
@@ -29,7 +32,9 @@ const Login = () => {
         e.preventDefault();
         setFormError("");
         try {
-            await loginWithEmail(email, password);
+            const result = await loginWithEmail(email, password);
+            // Navigate to /dashboard — RoleBasedRedirect will wait for
+            // userData from the backend and route accordingly (admin -> /admin/dashboard)
             navigate('/dashboard');
         } catch (err) {
             setFormError(err.message);

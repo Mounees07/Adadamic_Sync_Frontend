@@ -82,12 +82,20 @@ const PrivateRoute = ({ children, allowedRoles }) => {
 // Helper to determine the dashboard internal route based on role
 const RoleBasedRedirect = () => {
   const { currentUser, userData, loading } = useAuth();
+  const [timedOut, setTimedOut] = React.useState(false);
+
+  React.useEffect(() => {
+    // If we have a user but no userData after 6s, stop waiting
+    if (currentUser && !userData) {
+      const timer = setTimeout(() => setTimedOut(true), 6000);
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser, userData]);
 
   if (loading) return <div className="loading-screen">Loading...</div>;
 
-  // If user is logged in but userData hasn't loaded yet, wait.
-  // This prevents defaulting to Student Dashboard prematurely.
-  if (currentUser && !userData) {
+  // If user is logged in but userData hasn't loaded yet, wait (up to 6s).
+  if (currentUser && !userData && !timedOut) {
     return <div className="loading-screen">Fetching Profile...</div>;
   }
 

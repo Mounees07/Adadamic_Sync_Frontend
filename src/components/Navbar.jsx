@@ -1,10 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, User, LogOut, Sun, Moon, Monitor, Settings, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Bell, Search, User, LogOut, Sun, Moon, Monitor, Settings, MessageCircle, ArrowLeft, Menu } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import './Navbar.css';
-
 
 const toRoman = (num) => {
     const lookup = { M: 1000, CM: 900, D: 500, CD: 400, C: 100, XC: 90, L: 50, XL: 40, X: 10, IX: 9, V: 5, IV: 4, I: 1 };
@@ -18,7 +17,7 @@ const toRoman = (num) => {
     return roman;
 };
 
-const Navbar = () => {
+const Navbar = ({ toggleSidebar }) => {
     const { userData, logout } = useAuth();
     const { theme, setTheme } = useTheme();
     const navigate = useNavigate();
@@ -109,6 +108,10 @@ const Navbar = () => {
 
             <nav className="navbar">
                 <div className="navbar-title">
+                    <button className="mobile-menu-btn" onClick={toggleSidebar}>
+                        <Menu size={24} />
+                    </button>
+                    <span className="mobile-page-title">{currentTitle}</span>
                 </div>
 
                 <div className="nav-actions">

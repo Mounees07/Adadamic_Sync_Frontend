@@ -24,6 +24,18 @@
     overflow: hidden;
 }
 
+@media (max-width: 768px) {
+    .analytics-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    .header-content h1 {
+        font-size: 1.8rem;
+    }
+}
+
 .analytics-header::after {
     content: '';
     position: absolute;
@@ -42,6 +54,7 @@
     letter-spacing: -0.05em;
     background: linear-gradient(to right, var(--text-primary), var(--text-secondary));
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     margin: 0;
 }
@@ -161,8 +174,13 @@
     margin-bottom: 2.5rem;
 }
 
-@media (max-width: 1024px) {
-    .charts-split {
+.charts-split-reverse {
+    grid-template-columns: 1fr 2fr;
+}
+
+@media (max-width: 768px) {
+    .charts-split,
+    .charts-split-reverse {
         grid-template-columns: 1fr;
     }
 }

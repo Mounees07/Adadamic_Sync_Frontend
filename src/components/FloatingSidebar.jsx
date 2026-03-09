@@ -21,7 +21,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import './FloatingSidebar.css';
 
-const FloatingSidebar = () => {
+const FloatingSidebar = ({ isOpen, setIsOpen }) => {
     const { userData } = useAuth();
 
     const studentLinks = [
@@ -99,12 +99,13 @@ const FloatingSidebar = () => {
     const links = getLinksByRole(userData?.role);
 
     return (
-        <aside className="floating-sidebar">
+        <aside className={`floating-sidebar ${isOpen ? 'open' : ''}`}>
             <div className="nav-icons-container">
                 {links.map((link) => (
                     <NavLink
                         key={link.to}
                         to={link.to}
+                        onClick={() => setIsOpen && setIsOpen(false)}
                         className={({ isActive }) => `f-nav-link ${isActive ? 'active' : ''}`}
                     >
                         {link.icon}

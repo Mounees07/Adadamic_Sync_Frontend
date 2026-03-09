@@ -23,12 +23,23 @@ const HODStudents = () => {
     const fetchStudents = async () => {
         setLoading(true);
         try {
-            // Using placeholder data fetch structure - modify endpoint if needed
-            const res = await api.get(`/users/students/department?department=${userData.department}`).catch(() => ({ data: [] }));
-            const fetchedStudents = res.data;
+            const res = await api.get(`/department/students-directory/${userData.department}`).catch(() => ({ data: { stats: null, students: [] } }));
+            const fetchedData = res.data;
+            const fetchedStudents = fetchedData.students || [];
 
-            // Generate mock array if no students returned yet to match UI design exactly
-            const displayStudents = fetchedStudents.length > 0 ? fetchedStudents : Array(8).fill(null).map((_, i) => ({
+            // Generate mapped array from actual backend data OR fallback to mock if completely empty
+            const displayStudents = fetchedStudents.length > 0 ? fetchedStudents.map((s, i) => ({
+                id: s.id || i,
+                fullName: s.fullName,
+                rollNumber: s.rollNumber || '-',
+                programName: s.courseName || s.department || 'B.Sc. Computer Science',
+                programType: s.branchType || 'Full-time',
+                yearName: s.semester ? (s.semester <= 2 ? 'Freshman' : s.semester <= 4 ? 'Sophomore' : s.semester <= 6 ? 'Junior' : 'Senior') : 'Unknown',
+                yearLevel: s.semester ? `Year ${Math.ceil(s.semester / 2)}` : '-',
+                gpa: s.gpa || s.cgpa || '-',
+                status: s.studentStatus || 'Active',
+                profilePictureUrl: s.profilePictureUrl
+            })) : Array(8).fill(null).map((_, i) => ({
                 id: i,
                 fullName: ['Emma Watson', 'James Anderson', 'Sophia Chen', 'Liam Patel', 'Isabella Martinez', 'Omar Al-Fayed', 'Chloe Price', 'John Doe'][i % 8],
                 rollNumber: ['CS2021001', 'CS2020045', 'CS2022103', 'CS2023012', 'CS2019088', 'CS2021158', 'CS2022034', 'CS2021000'][i % 8],
@@ -42,13 +53,16 @@ const HODStudents = () => {
 
             setStudents(displayStudents);
 
-            // Set fixed mock stats to match image exactly
-            setStats({
-                totalStudents: 1428,
-                undergraduates: 1120,
-                postgraduates: 308,
-                atRisk: 24
-            });
+            if (fetchedData.stats) {
+                setStats(fetchedData.stats);
+            } else {
+                setStats({
+                    totalStudents: 1428,
+                    undergraduates: 1120,
+                    postgraduates: 308,
+                    atRisk: 24
+                });
+            }
         } catch (error) {
             console.error("Failed to fetch students data", error);
         } finally {

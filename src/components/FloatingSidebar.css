@@ -188,3 +188,86 @@ body.dark .f-tooltip::before,
 [data-theme='light'] .logout-btn-pill:hover {
     background-color: rgba(239, 68, 68, 0.15);
 }
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+    .floating-sidebar {
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 250px;
+        height: 100vh;
+        border-radius: 0 20px 20px 0;
+        transform: translateX(-100%);
+        padding: 40px 16px;
+        align-items: flex-start;
+        background-color: var(--bg-card); /* Should be solid enough */
+        box-shadow: 4px 0 24px rgba(0,0,0,0.1);
+    }
+    
+    .floating-sidebar.open {
+        transform: translateX(0);
+    }
+
+    .nav-icons-container {
+        align-items: flex-start;
+        padding-top: 24px;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .f-nav-link {
+        width: 100%;
+        height: 48px;
+        justify-content: flex-start;
+        padding: 0 16px;
+        border-radius: 12px;
+        gap: 16px; /* Space between icon and text */
+    }
+
+    /* Show tooltip text as standard text in drawer */
+    .f-tooltip {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        background: transparent;
+        color: inherit;
+        box-shadow: none;
+        padding: 0;
+        margin-left: 0;
+        transform: none;
+        font-size: 1rem;
+        font-weight: 500;
+        pointer-events: auto;
+    }
+    
+    .f-tooltip::before {
+        display: none; /* Hide the arrow */
+    }
+
+    .f-nav-link.active .f-tooltip {
+        color: white; /* match active state */
+    }
+    
+    body.dark .f-tooltip,
+    [data-theme='dark'] .f-tooltip,
+    body.dark .f-nav-link.active .f-tooltip,
+    [data-theme='dark'] .f-nav-link.active .f-tooltip {
+        /* Maintain colors in tooltip when drawn inline */
+        color: inherit;
+        background: transparent;
+        box-shadow: none;
+    }
+
+    .sidebar-bottom {
+        padding: 20px 16px;
+        align-items: flex-start;
+    }
+    
+    .logout-btn-pill {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 0 16px;
+        gap: 16px;
+    }
+}

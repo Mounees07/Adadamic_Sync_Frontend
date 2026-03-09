@@ -188,7 +188,7 @@ const HODAnalytics = () => {
                 </div>
             </div>
 
-            <div className="charts-split" style={{ gridTemplateColumns: '1fr 2fr' }}>
+            <div className="charts-split charts-split-reverse">
                 <div className="chart-card">
                     <div className="chart-header">
                         <h3 className="chart-title">
