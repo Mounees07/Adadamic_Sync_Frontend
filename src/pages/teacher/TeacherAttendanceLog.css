@@ -164,6 +164,15 @@
     box-sizing: border-box;
 }
 
+.att-datepicker-wrapper {
+    width: 100%;
+}
+
+.att-datepicker-wrapper .react-datepicker-wrapper,
+.att-datepicker-wrapper .react-datepicker__input-container {
+    width: 100%;
+}
+
 .att-date-input:focus {
     outline: none;
     border-color: #6366f1;

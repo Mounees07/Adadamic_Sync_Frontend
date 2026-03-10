@@ -5,7 +5,8 @@ import { useAuth } from '../../context/AuthContext';
 import './HODStudents.css';
 
 const HODStudents = () => {
-    const { userData } = useAuth();
+    const { currentUser, userData } = useAuth();
+    const [resolvedDept, setResolvedDept] = useState(null);
     const [students, setStudents] = useState([]);
     const [stats, setStats] = useState({ totalStudents: 0, undergraduates: 0, postgraduates: 0, atRisk: 0 });
     const [loading, setLoading] = useState(true);
@@ -15,15 +16,23 @@ const HODStudents = () => {
     const itemsPerPage = 6;
 
     useEffect(() => {
-        if (userData?.department) {
+        if (currentUser) {
             fetchStudents();
         }
-    }, [userData]);
+    }, [currentUser, userData]);
 
     const fetchStudents = async () => {
         setLoading(true);
         try {
-            const res = await api.get(`/department/students-directory/${userData.department}`).catch(() => ({ data: { stats: null, students: [] } }));
+            let dept = userData?.department;
+            if (!dept && currentUser) {
+                const hodRes = await api.get(`/department/by-hod/${currentUser.uid}`);
+                dept = hodRes.data.department;
+            }
+            if (!dept) { setLoading(false); return; }
+            setResolvedDept(dept);
+
+            const res = await api.get(`/department/students-directory/${dept}`).catch(() => ({ data: { stats: null, students: [] } }));
             const fetchedData = res.data;
             const fetchedStudents = fetchedData.students || [];
 
@@ -214,7 +223,7 @@ const HODStudents = () => {
                                             </td>
                                             <td>
                                                 <div className="program-cell">
-                                                    <span className="program-name">{student.programName || `${userData.department} Dept`}</span>
+                                                    <span className="program-name">{student.programName || `${resolvedDept || userData?.department || 'CS'} Dept`}</span>
                                                     <span className="program-type">{student.programType || 'Full-time'}</span>
                                                 </div>
                                             </td>

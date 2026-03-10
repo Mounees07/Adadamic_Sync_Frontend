@@ -121,22 +121,41 @@ const MyProfile = () => {
     );
 
     const InfoRow = ({ label, value, name, editable = false }) => (
-        <div style={{ display: 'flex', alignItems: 'flex-start', padding: '8px 0', borderBottom: '1px solid rgba(128,128,128,0.1)' }}>
-            <div style={{ width: '33%', minWidth: '130px', flexShrink: 0, fontSize: '0.875rem', fontWeight: 500, color: '#6b7280', display: 'flex', alignItems: 'flex-start', justifyContent: 'flex-end', marginRight: '12px' }}>
-                <span style={{ textAlign: 'right', wordBreak: 'break-word', lineHeight: '1.5' }}>{label}</span>
-                <span style={{ userSelect: 'none', marginLeft: '8px', lineHeight: '1.5' }}>:</span>
-            </div>
-            <div style={{ flex: 1, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', wordBreak: 'break-word', lineHeight: '1.5' }}>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '12px 16px',
+            background: 'var(--bg-subtle)',
+            borderRadius: '12px',
+            border: '1px solid var(--glass-border)',
+            transition: 'all 0.2s ease',
+            height: '100%'
+        }} className="hover:shadow-sm">
+            <span style={{
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                color: 'var(--text-muted)',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                marginBottom: '4px'
+            }}>{label}</span>
+            <div style={{
+                fontSize: '0.95rem',
+                fontWeight: 700,
+                color: 'var(--text-primary)',
+                wordBreak: 'break-word'
+            }}>
                 {editable && isEditing ? (
                     <input
                         type="text"
                         name={name}
                         value={formData[name] || ''}
                         onChange={handleChange}
-                        className="w-full px-2 py-1 rounded border text-sm focus:ring-1 focus:ring-blue-500 outline-none bg-transparent"
+                        className="w-full px-3 py-2 rounded-lg border text-sm focus:ring-2 focus:ring-blue-500 outline-none bg-transparent"
                         style={{
                             borderColor: 'var(--glass-border)',
-                            color: 'var(--text-primary)'
+                            color: 'var(--text-primary)',
+                            marginTop: '4px'
                         }}
                     />
                 ) : (
@@ -304,7 +323,7 @@ const MyProfile = () => {
                     {activeTab === 'Personal' && (
                         <div className="animate-fade-in">
                             <SectionCard title="PERSONAL DETAILS" icon={User} iconColor="text-blue-500">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                                     <InfoRow label="Batch" value={profile.batch} />
                                     <InfoRow label="Date of Admission" value={profile.admissionYear} />
                                     <InfoRow label="Student Name" value={profile.fullName} />
@@ -328,7 +347,7 @@ const MyProfile = () => {
 
                                     <div className="pt-4 mt-2 border-t border-gray-100 dark:border-gray-800" style={{ gridColumn: '1 / -1' }}>
                                         <h4 className="font-semibold text-sm mb-3 text-blue-600 dark:text-blue-400 uppercase tracking-wider">Parent Occupation</h4>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                                             <InfoRow label="Occupation" value={profile.parentOccupation} />
                                             <InfoRow label="Place of Work" value={profile.parentPlaceOfWork} />
                                             <InfoRow label="Designation" value={profile.parentDesignation} />
@@ -344,7 +363,7 @@ const MyProfile = () => {
                     {activeTab === 'Academic' && (
                         <div className="animate-fade-in">
                             <SectionCard title="ACADEMIC DETAILS" icon={BookOpen} iconColor="text-indigo-500">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                                     <InfoRow label="Branch Code" value={profile.branchCode} />
                                     <InfoRow label="Degree Level" value={profile.degreeLevel} />
                                     <InfoRow label="Course Code" value={profile.courseCode} />
@@ -372,7 +391,7 @@ const MyProfile = () => {
                     {activeTab === 'Admission' && (
                         <div className="animate-fade-in">
                             <SectionCard title="ADMISSION PAYMENT DETAILS" icon={ClipboardList} iconColor="text-green-500">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                                     <InfoRow label="DTE Register No" value={profile.dteRegisterNo} />
                                     <InfoRow label="DTE Admission No" value={profile.dteAdmissionNo} />
                                     <InfoRow label="DTE General Rank" value={profile.dteGeneralRank} />
@@ -392,7 +411,7 @@ const MyProfile = () => {
                                 {/* Insurance Sub-section */}
                                 <div className="mb-4 pb-4 border-b border-gray-100 dark:border-gray-800">
                                     <h4 className="font-semibold text-sm mb-3 text-purple-600 dark:text-purple-400 uppercase tracking-wider">Insurance Details</h4>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                                         <div className="space-y-3">
                                             <InfoRow label="Nominee Name" value={profile.nomineeName} />
                                             <InfoRow label="Nominee Age" value={profile.nomineeAge} />
@@ -403,7 +422,7 @@ const MyProfile = () => {
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                                     <InfoRow
                                         label="Permanent Address"
                                         value={profile.permanentAddress}
@@ -450,7 +469,7 @@ const MyProfile = () => {
                     {activeTab === 'Hostel' && (
                         <div className="animate-fade-in">
                             <SectionCard title="CLASS ADVISOR/HOSTEL DETAILS" icon={Briefcase} iconColor="text-orange-500">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
                                     <div className="space-y-3">
                                         <InfoRow label="Hosteller/Dayscholar" value={profile.hostellerDayScholar} />
                                         <InfoRow label="Hostel Name" value={profile.hostelName} />
@@ -475,16 +494,12 @@ const MyProfile = () => {
                     {activeTab === 'School' && (
                         <div className="animate-fade-in space-y-6">
                             <SectionCard title="SCHOOL MARKS DETAILS" icon={GraduationCap} iconColor="text-pink-500">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4 mb-6">
-                                    <div className="space-y-3">
-                                        <InfoRow label="School Qualification" value={profile.schoolQualification} />
-                                        <InfoRow label="School Study State" value={profile.schoolStudyState} />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <InfoRow label="School Year of Pass" value={profile.schoolYearOfPass} />
-                                        <InfoRow label="School No of Attempts" value={profile.schoolNoOfAttempts} />
-                                        <InfoRow label="School Classification" value={profile.schoolClassification} />
-                                    </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px', marginBottom: '1.5rem' }}>
+                                    <InfoRow label="School Qualification" value={profile.schoolQualification} />
+                                    <InfoRow label="School Study State" value={profile.schoolStudyState} />
+                                    <InfoRow label="School Year of Pass" value={profile.schoolYearOfPass} />
+                                    <InfoRow label="School No of Attempts" value={profile.schoolNoOfAttempts} />
+                                    <InfoRow label="School Classification" value={profile.schoolClassification} />
                                 </div>
 
                                 <div className="overflow-x-auto rounded-lg border border-gray-100 dark:border-gray-800">
@@ -519,47 +534,35 @@ const MyProfile = () => {
                             </SectionCard>
 
                             <SectionCard title="SCHOOL CERTIFICATE DETAILS" icon={BookOpen} iconColor="text-teal-500">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                    <div className="space-y-3">
-                                        <InfoRow label="School Reg No1" value={profile.schoolRegNo1} />
-                                        <InfoRow label="School Reg No2" value={profile.schoolRegNo2} />
-                                        <InfoRow label="School Reg No3" value={profile.schoolRegNo3} />
-                                        <InfoRow label="School Reg No4" value={profile.schoolRegNo4} />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <InfoRow label="School Certificate No1" value={profile.schoolCertNo1} />
-                                        <InfoRow label="School Certificate No2" value={profile.schoolCertNo2} />
-                                        <InfoRow label="School Certificate No3" value={profile.schoolCertNo3} />
-                                        <InfoRow label="School Certificate No4" value={profile.schoolCertNo4} />
-                                    </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                    <InfoRow label="School Reg No1" value={profile.schoolRegNo1} />
+                                    <InfoRow label="School Reg No2" value={profile.schoolRegNo2} />
+                                    <InfoRow label="School Reg No3" value={profile.schoolRegNo3} />
+                                    <InfoRow label="School Reg No4" value={profile.schoolRegNo4} />
+                                    <InfoRow label="School Certificate No1" value={profile.schoolCertNo1} />
+                                    <InfoRow label="School Certificate No2" value={profile.schoolCertNo2} />
+                                    <InfoRow label="School Certificate No3" value={profile.schoolCertNo3} />
+                                    <InfoRow label="School Certificate No4" value={profile.schoolCertNo4} />
                                 </div>
-                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-4">
-                                    <div className="space-y-3">
-                                        <InfoRow label="School Total Marks1" value={profile.schoolTotalMarks1} />
-                                        <InfoRow label="School Total Marks3" value={profile.schoolTotalMarks3} />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <InfoRow label="School Total Marks2" value={profile.schoolTotalMarks2} />
-                                        <InfoRow label="School Total Marks4" value={profile.schoolTotalMarks4} />
-                                    </div>
+                                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                    <InfoRow label="School Total Marks1" value={profile.schoolTotalMarks1} />
+                                    <InfoRow label="School Total Marks3" value={profile.schoolTotalMarks3} />
+                                    <InfoRow label="School Total Marks2" value={profile.schoolTotalMarks2} />
+                                    <InfoRow label="School Total Marks4" value={profile.schoolTotalMarks4} />
                                 </div>
                             </SectionCard>
 
                             <SectionCard title="SCHOOL TC DETAILS" icon={Calendar} iconColor="text-yellow-500">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                    <div className="space-y-3">
-                                        <InfoRow label="School Name" value={profile.schoolName} />
-                                        <InfoRow label="School TC Name" value={profile.schoolTCName} />
-                                        <InfoRow label="School TC No" value={profile.schoolTCNo} />
-                                        <InfoRow label="School TC Date" value={profile.schoolTCDate} />
-                                        <InfoRow label="School TC Class" value={profile.schoolTCClass} />
-                                        <InfoRow label="Board of School" value={profile.boardOfSchool} />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <InfoRow label="Cut off Marks in 300(Cut off Marks in 200+Entrance Marks)" value={profile.schoolCutOff300} />
-                                        <InfoRow label="Marks Note1" value={profile.marksNote1} />
-                                        <InfoRow label="Marks Note2" value={profile.marksNote2} />
-                                    </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                    <InfoRow label="School Name" value={profile.schoolName} />
+                                    <InfoRow label="School TC Name" value={profile.schoolTCName} />
+                                    <InfoRow label="School TC No" value={profile.schoolTCNo} />
+                                    <InfoRow label="School TC Date" value={profile.schoolTCDate} />
+                                    <InfoRow label="School TC Class" value={profile.schoolTCClass} />
+                                    <InfoRow label="Board of School" value={profile.boardOfSchool} />
+                                    <InfoRow label="Cut off Marks in 300(Cut off Marks in 200+Entrance Marks)" value={profile.schoolCutOff300} />
+                                    <InfoRow label="Marks Note1" value={profile.marksNote1} />
+                                    <InfoRow label="Marks Note2" value={profile.marksNote2} />
                                 </div>
                             </SectionCard>
                         </div>
@@ -569,26 +572,22 @@ const MyProfile = () => {
                     {activeTab === 'Institute' && (
                         <div className="animate-fade-in">
                             <SectionCard title="BIT ACADEMIC DETAILS" icon={ClipboardList} iconColor="text-red-500">
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                                    <div className="space-y-3">
-                                        <InfoRow label="TC Last Class Date" value={profile.tcLastClassDate} />
-                                        <InfoRow label="TC Promotion To Next Higher Class" value={profile.tcPromotion} />
-                                        <InfoRow label="TC Reason For Leaving" value={profile.tcReasonLeaving} />
-                                        <InfoRow label="TC Conduct And Character" value={profile.tcConduct} />
-                                        <InfoRow label="TC No" value={profile.bitTCNo} />
-                                        <InfoRow label="TC Date" value={profile.bitTCDate} />
-                                        <InfoRow label="Duplicate TC Issued" value={profile.duplicateTCIssued} />
-                                        <InfoRow label="Duplicate TC Description" value={profile.duplicateTCDescription} />
-                                    </div>
-                                    <div className="space-y-3">
-                                        <InfoRow label="Final Total Marks Min" value={profile.finalTotalMarksMin} />
-                                        <InfoRow label="Final Total Marks Max" value={profile.finalTotalMarksMax} />
-                                        <InfoRow label="Final Total Marks %" value={profile.finalTotalMarksPct} />
-                                        <InfoRow label="Final Classification" value={profile.finalClassification} />
-                                        <InfoRow label="Final Year of Pass" value={profile.finalYearOfPass} />
-                                        <InfoRow label="University Rank" value={profile.universityRank} />
-                                        <InfoRow label="University Rank1" value={profile.universityRank1} />
-                                    </div>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '16px' }}>
+                                    <InfoRow label="TC Last Class Date" value={profile.tcLastClassDate} />
+                                    <InfoRow label="TC Promotion To Next Higher Class" value={profile.tcPromotion} />
+                                    <InfoRow label="TC Reason For Leaving" value={profile.tcReasonLeaving} />
+                                    <InfoRow label="TC Conduct And Character" value={profile.tcConduct} />
+                                    <InfoRow label="TC No" value={profile.bitTCNo} />
+                                    <InfoRow label="TC Date" value={profile.bitTCDate} />
+                                    <InfoRow label="Duplicate TC Issued" value={profile.duplicateTCIssued} />
+                                    <InfoRow label="Duplicate TC Description" value={profile.duplicateTCDescription} />
+                                    <InfoRow label="Final Total Marks Min" value={profile.finalTotalMarksMin} />
+                                    <InfoRow label="Final Total Marks Max" value={profile.finalTotalMarksMax} />
+                                    <InfoRow label="Final Total Marks %" value={profile.finalTotalMarksPct} />
+                                    <InfoRow label="Final Classification" value={profile.finalClassification} />
+                                    <InfoRow label="Final Year of Pass" value={profile.finalYearOfPass} />
+                                    <InfoRow label="University Rank" value={profile.universityRank} />
+                                    <InfoRow label="University Rank1" value={profile.universityRank1} />
                                 </div>
                             </SectionCard>
                         </div>

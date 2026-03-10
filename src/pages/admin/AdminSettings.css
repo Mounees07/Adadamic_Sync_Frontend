@@ -274,55 +274,56 @@
     line-height: 1.5;
 }
 
-/* ── Pill Toggle Switch ───────────────────────────────── */
-.toggle-pill {
-    position: relative;
-    display: inline-flex;
+/* ── Switch Wrapper Toggle ───────────────────────────────── */
+.switch-wrapper {
+    --size: 56px;
+    display: flex;
     align-items: center;
-    width: 52px;
-    height: 28px;
-    border-radius: 999px;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    flex-shrink: 0;
-    background: var(--glass-border, rgba(255, 255, 255, 0.15));
-    transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.switch-wrapper input[type="checkbox"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: var(--size);
+    height: calc(var(--size) / 2);
+    background-color: var(--bg-subtle, #fff);
+    border: 3px solid var(--text-primary, #222);
+    border-radius: calc(var(--size) * 0.3) var(--size) var(--size) var(--size);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     outline: none;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.5s;
+    margin: 0;
+    flex-shrink: 0;
 }
 
-.toggle-pill:hover {
-    box-shadow: 0 0 0 3px rgba(124, 107, 220, 0.18);
-}
-
-.toggle-pill:focus-visible {
-    box-shadow: 0 0 0 3px rgba(124, 107, 220, 0.4);
-}
-
-.toggle-pill--on {
-    background: linear-gradient(135deg, #6366f1, #4D44B5);
-    box-shadow: 0 2px 10px rgba(99, 102, 241, 0.35);
-}
-
-.toggle-pill--on:hover {
-    box-shadow: 0 2px 14px rgba(99, 102, 241, 0.5);
-}
-
-.toggle-pill__knob {
+.switch-wrapper input[type="checkbox"]::before {
+    content: "";
     position: absolute;
-    left: 4px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #ffffff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
-    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
-        background 0.2s ease;
+    width: calc(var(--size) / 2);
+    height: calc(var(--size) / 2);
+    left: -1.5px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.7);
+    border: 3px solid var(--text-primary, #222);
+    border-radius: calc(var(--size) * 0.3) var(--size) var(--size) var(--size);
+    background-color: #5559da;
+    box-sizing: border-box;
+    transition: all 0.5s;
 }
 
-.toggle-pill--on .toggle-pill__knob {
-    transform: translateX(24px);
-    background: #ffffff;
+.switch-wrapper input[type="checkbox"]:checked {
+    background-color: #5559da;
+    border-color: #5559da;
+    border-radius: var(--size) var(--size) calc(var(--size) * 0.3) var(--size);
+}
+
+.switch-wrapper input[type="checkbox"]:checked::before {
+    left: calc(50% - 1.5px);
+    background-color: var(--bg-card, #fff);
+    border-color: var(--bg-card, #fff);
+    border-radius: var(--size) var(--size) calc(var(--size) * 0.3) var(--size);
 }
 
 /* Alerts */
@@ -475,22 +476,27 @@
     .settings-container {
         padding: 16px;
     }
+
     .settings-header {
         flex-direction: column;
         gap: 16px;
         align-items: flex-start;
     }
+
     .save-btn {
         width: 100%;
         justify-content: center;
     }
+
     .settings-main-card {
         padding: 16px;
     }
+
     .section-grid {
         grid-template-columns: 1fr;
         gap: 24px;
     }
+
     .settings-tabs-container {
         overflow-x: auto;
         flex-wrap: nowrap;
@@ -498,6 +504,7 @@
         -webkit-overflow-scrolling: touch;
         border-bottom: none;
     }
+
     .tab-button {
         min-width: unset;
         white-space: nowrap;

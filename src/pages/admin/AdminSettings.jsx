@@ -173,15 +173,15 @@ const AdminSettings = () => {
     };
 
     const ToggleSwitch = ({ name, checked, onChange }) => (
-        <button
-            className={`toggle-pill ${checked ? 'toggle-pill--on' : ''}`}
-            role="switch"
-            aria-checked={checked}
-            onClick={() => onChange({ target: { name, type: 'checkbox', checked: !checked } })}
-            title={checked ? 'Enabled — click to disable' : 'Disabled — click to enable'}
-        >
-            <span className="toggle-pill__knob" />
-        </button>
+        <div className="switch-wrapper">
+            <input
+                type="checkbox"
+                name={name}
+                id={`switch-${name}`}
+                checked={checked}
+                onChange={onChange}
+            />
+        </div>
     );
 
     const tabs = [

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/api';
 import {
     ArrowLeft,
     Download,
@@ -18,6 +20,7 @@ import './HODResourceUtilization.css';
 
 const HODResourceUtilization = () => {
     const navigate = useNavigate();
+    const { currentUser, userData } = useAuth();
 
     // Stats states initialized safely to 0
     const [stats, setStats] = useState({
@@ -52,15 +55,33 @@ const HODResourceUtilization = () => {
     const [riskLabs, setRiskLabs] = useState([]);
 
     useEffect(() => {
-        // Fetch logic would go here
-    }, []);
+        const fetchResourceData = async () => {
+            if (!currentUser) return;
+            try {
+                let dept = userData?.department;
+                if (!dept) {
+                    const hodRes = await api.get(`/department/by-hod/${currentUser.uid}`);
+                    dept = hodRes.data.department;
+                }
+                if (!dept) return;
+                const res = await api.get(`/department/resource-utilization/${dept}`);
+                const data = res.data;
+                if (data.stats) setStats(data.stats);
+                if (data.utilization) setUtilization(data.utilization);
+                if (data.riskLabs) setRiskLabs(data.riskLabs);
+            } catch (err) {
+                console.error("Failed to fetch resource utilization data", err);
+            }
+        };
+        fetchResourceData();
+    }, [currentUser, userData]);
 
     return (
         <div className="resource-utilization-container">
             {/* Header Section */}
             <div className="resource-breadcrumb">
                 <span onClick={() => navigate('/department-analytics')} className="link-back">
-                    <ArrowLeft size={14} className="inline-icon" /> Reports 
+                    <ArrowLeft size={14} className="inline-icon" /> Reports
                 </span>
                 <span className="separator">&gt;</span>
                 <span className="current">Resource Utilization</span>
@@ -198,7 +219,7 @@ const HODResourceUtilization = () => {
 
             {/* Main Grid Two Columns */}
             <div className="resource-main-grid">
-                
+
                 {/* Left Column - Utilization Details */}
                 <div className="resource-card-left">
                     <div className="card-header-flex">
@@ -253,7 +274,7 @@ const HODResourceUtilization = () => {
 
                         {/* Stacked Bar Percentages */}
                         <div className="who-stacked-bar">
-                            { (utilization.studentsPct === 0 && utilization.facultyPct === 0 && utilization.othersPct === 0) ? (
+                            {(utilization.studentsPct === 0 && utilization.facultyPct === 0 && utilization.othersPct === 0) ? (
                                 <div className="who-segment bg-gray-subtle" style={{ width: '100%' }}>
                                     <span>0% Data</span>
                                 </div>
@@ -344,11 +365,11 @@ const HODResourceUtilization = () => {
                                                 </div>
                                             </td>
                                             <td>
-                                                <span className="sys-count">{lab.systems}</span><br/>
+                                                <span className="sys-count">{lab.systems}</span><br />
                                                 <span className="sys-lbl">systems</span>
                                             </td>
                                             <td>
-                                                <span className="sys-count">{lab.maintenance}</span><br/>
+                                                <span className="sys-count">{lab.maintenance}</span><br />
                                                 <span className="sys-lbl">systems</span>
                                             </td>
                                             <td>

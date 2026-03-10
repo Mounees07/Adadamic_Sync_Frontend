@@ -5,7 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import './HODFaculty.css';
 
 const HODFaculty = () => {
-    const { userData } = useAuth();
+    const { currentUser, userData } = useAuth();
     const [faculty, setFaculty] = useState([]);
     const [stats, setStats] = useState({ totalFaculty: 0, onLeave: 0, openPositions: 0 });
     const [loading, setLoading] = useState(true);
@@ -15,25 +15,31 @@ const HODFaculty = () => {
     const itemsPerPage = 6;
 
     useEffect(() => {
-        if (userData?.department) {
+        if (currentUser) {
             fetchFaculty();
         }
-    }, [userData]);
+    }, [currentUser, userData]);
 
     const fetchFaculty = async () => {
         setLoading(true);
         try {
+            let dept = userData?.department;
+            if (!dept && currentUser) {
+                const hodRes = await api.get(`/department/by-hod/${currentUser.uid}`);
+                dept = hodRes.data.department;
+            }
+            if (!dept) { setLoading(false); return; }
+
             const [facultyRes, statsRes] = await Promise.all([
-                api.get(`/users/faculty/department?department=${userData.department}`),
-                api.get(`/department/dashboard/${userData.department}`)
+                api.get(`/users/faculty/department?department=${dept}`),
+                api.get(`/department/dashboard/${dept}`)
             ]);
             setFaculty(facultyRes.data);
 
-            // Dummy logic for open positions since we don't have a backend hiring module
             setStats({
                 totalFaculty: facultyRes.data.length,
                 onLeave: statsRes.data.pendingLeaves || 0,
-                openPositions: 2 // Hardcoded as placeholder for hiring
+                openPositions: 2
             });
         } catch (error) {
             console.error("Failed to fetch faculty data", error);

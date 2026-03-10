@@ -4,9 +4,14 @@ import {
     BookOpen, Search, ChevronDown, UserCheck, ClipboardList,
     Smartphone, Edit3, RefreshCw, Download, Filter
 } from 'lucide-react';
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { enGB } from 'date-fns/locale/en-GB';
+import 'react-datepicker/dist/react-datepicker.css';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import './TeacherAttendanceLog.css';
+
+registerLocale('en-GB', enGB);
 
 const TeacherAttendanceLog = () => {
     const { currentUser } = useAuth();
@@ -346,11 +351,20 @@ const TeacherAttendanceLog = () => {
                     <label className="att-filter-label">
                         <Calendar size={14} /> Date
                     </label>
-                    <input
-                        type="date"
+                    <DatePicker
+                        selected={new Date(selectedDate)}
+                        onChange={(date) => {
+                            if (date) {
+                                // Formatting date back to string without timezone shifts
+                                const offset = date.getTimezoneOffset();
+                                const correctedDate = new Date(date.getTime() - (offset * 60 * 1000));
+                                setSelectedDate(correctedDate.toISOString().split('T')[0]);
+                            }
+                        }}
                         className="att-date-input"
-                        value={selectedDate}
-                        onChange={e => setSelectedDate(e.target.value)}
+                        wrapperClassName="att-datepicker-wrapper"
+                        locale="en-GB"
+                        showWeekNumbers
                     />
                 </div>
 

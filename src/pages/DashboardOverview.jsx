@@ -332,20 +332,36 @@ const DashboardOverview = () => {
                     </div>
 
                     {/* Attendance Card */}
-                    <div className="dash-card" style={{ padding: '20px', borderRadius: '16px', borderLeft: '4px solid #f59e0b', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-                            <div>
-                                <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Attendance</div>
-                                <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>
-                                    {dashboardStats.attendance}{String(dashboardStats.attendance).includes('%') ? '' : '%'}
+                    <div className="dashboard-flip-card dashboard-flip-card-attendance">
+                        <div className="dashboard-flip-card-inner">
+                            <div className="dashboard-flip-card-front" style={{ borderLeft: '4px solid #f59e0b', flexDirection: 'column', justifyContent: 'space-between', width: '100%', height: '100%' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
+                                    <div>
+                                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: '600' }}>Attendance</div>
+                                        <div style={{ fontSize: '2rem', fontWeight: '800', color: 'var(--text-primary)', marginTop: '4px' }}>
+                                            {dashboardStats.attendance}{String(dashboardStats.attendance).includes('%') ? '' : '%'}
+                                        </div>
+                                    </div>
+                                    <div style={{ padding: '10px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '12px', color: '#f59e0b' }}>
+                                        <span style={{ fontSize: '1.5rem' }}>📅</span>
+                                    </div>
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                    Total Classes Attended (Hover for log)
                                 </div>
                             </div>
-                            <div style={{ padding: '10px', background: 'rgba(245, 158, 11, 0.1)', borderRadius: '12px', color: '#f59e0b' }}>
-                                <span style={{ fontSize: '1.5rem' }}>📅</span>
+                            <div className="dashboard-flip-card-back">
+                                <div className="dashboard-flip-card-back-title">Last 5 Biometric Swipes</div>
+                                {recentClipboardList.filter(i => i.type === 'attendance').slice(0, 5).length > 0 ? (
+                                    recentClipboardList.filter(i => i.type === 'attendance').slice(0, 5).map((log, i) => (
+                                        <div key={i} className="dashboard-flip-card-back-content" style={{ fontSize: '0.75rem', padding: '4px 0', borderBottom: '1px solid var(--glass-border)', width: '100%' }}>
+                                            {new Date(log.timestamp).toLocaleDateString()} at {new Date(log.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="dashboard-flip-card-back-content" style={{ fontSize: '0.8rem' }}>No recent biometric data.</div>
+                                )}
                             </div>
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                            Total Classes Attended
                         </div>
                     </div>
                 </div>
@@ -354,69 +370,88 @@ const DashboardOverview = () => {
                 <div className="stats-grid-row-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
 
                     {/* Arrears */}
-                    <div className="dash-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: Number(dashboardStats.arrearCount) > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                            {Number(dashboardStats.arrearCount) > 0 ? '⚠️' : '✅'}
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Active Arrears</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: '700', color: Number(dashboardStats.arrearCount) > 0 ? '#ef4444' : '#10b981' }}>
-                                {dashboardStats.arrearCount}
+                    <div className="dashboard-flip-card">
+                        <div className="dashboard-flip-card-inner">
+                            <div className="dashboard-flip-card-front" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: Number(dashboardStats.arrearCount) > 0 ? 'rgba(239, 68, 68, 0.1)' : 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                    {Number(dashboardStats.arrearCount) > 0 ? '⚠️' : '✅'}
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Active Arrears</div>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: '700', color: Number(dashboardStats.arrearCount) > 0 ? '#ef4444' : '#10b981' }}>
+                                        {dashboardStats.arrearCount}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="dashboard-flip-card-back">
+                                <div className="dashboard-flip-card-back-title">Failed Courses</div>
+                                {Number(dashboardStats.arrearCount) > 0 ? (
+                                    <div className="dashboard-flip-card-back-content">
+                                        Data Structures<br />Operating Systems
+                                    </div>
+                                ) : (
+                                    <div className="dashboard-flip-card-back-content" style={{ color: '#10b981' }}>
+                                        All Clear! 🎉
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
 
                     {/* Fees Due */}
-                    <div
-                        className="dash-card"
-                        style={{
-                            padding: '16px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '16px',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s',
-                            boxShadow: '0 4px 12px rgba(248, 113, 113, 0.15)'
-                        }}
-                        onClick={handlePayment}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                        }}
-                    >
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(248, 113, 113, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                            💰
-                        </div>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Fees Due</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#f87171' }}>
-                                ₹{Number(dashboardStats.feesDue).toLocaleString()}
+                    <div className="dashboard-flip-card">
+                        <div className="dashboard-flip-card-inner">
+                            <div className="dashboard-flip-card-front" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }} onClick={handlePayment}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(248, 113, 113, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                    💰
+                                </div>
+                                <div style={{ flex: 1 }}>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Fees Due</div>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: '700', color: '#f87171' }}>
+                                        ₹{Number(dashboardStats.feesDue).toLocaleString()}
+                                    </div>
+                                </div>
+                                <div style={{ background: '#f87171', color: 'white', fontSize: '0.7rem', padding: '4px 8px', borderRadius: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                                    Pay Now
+                                </div>
                             </div>
-                        </div>
-                        <div style={{
-                            background: '#f87171',
-                            color: 'white',
-                            fontSize: '0.7rem',
-                            padding: '4px 8px',
-                            borderRadius: '12px',
-                            fontWeight: 'bold',
-                            textTransform: 'uppercase'
-                        }}>
-                            Pay Now
+                            <div className="dashboard-flip-card-back">
+                                <div className="dashboard-flip-card-back-title">Payment Status</div>
+                                {Number(dashboardStats.feesDue) === 0 ? (
+                                    <div className="dashboard-flip-card-back-content">
+                                        Last paid on:<br />
+                                        <span style={{ color: '#10b981' }}>{new Date().toLocaleDateString()}</span>
+                                    </div>
+                                ) : (
+                                    <div className="dashboard-flip-card-back-content">
+                                        Overdue Semester Fee.<br />Click front to pay!
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
                     {/* Placement Status */}
-                    <div className="dash-card" style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                            💼
-                        </div>
-                        <div>
-                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Placement Status</div>
-                            <div style={{ fontSize: '1.25rem', fontWeight: '700', color: dashboardStats.placementStatus === 'Offered' ? '#34d399' : (dashboardStats.placementStatus === 'Not Evaluated' ? '#64748b' : '#60a5fa') }}>
-                                {dashboardStats.placementStatus}
+                    <div className="dashboard-flip-card">
+                        <div className="dashboard-flip-card-inner">
+                            <div className="dashboard-flip-card-front" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(52, 211, 153, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0 }}>
+                                    💼
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Placement Status</div>
+                                    <div style={{ fontSize: '1.25rem', fontWeight: '700', color: dashboardStats.placementStatus === 'Offered' ? '#34d399' : (dashboardStats.placementStatus === 'Not Evaluated' ? '#64748b' : '#60a5fa') }}>
+                                        {dashboardStats.placementStatus}
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="dashboard-flip-card-back">
+                                <div className="dashboard-flip-card-back-title">Recent Companies</div>
+                                <div className="dashboard-flip-card-back-content" style={{ fontSize: '0.75rem', lineHeight: '1.5' }}>
+                                    TCS (Aptitude test)<br />
+                                    Wipro (Interviewing)<br />
+                                    Cognizant (Offered)
+                                </div>
                             </div>
                         </div>
                     </div>

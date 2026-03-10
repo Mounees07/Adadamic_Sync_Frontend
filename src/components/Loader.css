@@ -1,0 +1,27 @@
+.loader-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+    gap: 16px;
+    width: 100%;
+    height: 100%;
+}
+
+.loader-fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-main, #0a0a0b);
+    z-index: 9999;
+}
+
+.loader-text {
+    color: var(--text-muted, #64748b);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}

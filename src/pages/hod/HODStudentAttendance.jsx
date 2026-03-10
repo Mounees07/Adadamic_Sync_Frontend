@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/api';
 import {
     ArrowLeft,
     Printer,
@@ -27,8 +28,8 @@ import './HODStudentAttendance.css';
 
 const HODStudentAttendance = () => {
     const navigate = useNavigate();
-    const { userData } = useAuth();
-    
+    const { currentUser, userData } = useAuth();
+
     // States for data (initialized empty/0 to avoid mock system data)
     const [stats, setStats] = useState({
         avgAttendance: 0,
@@ -44,9 +45,26 @@ const HODStudentAttendance = () => {
     const [attendanceRecords, setAttendanceRecords] = useState([]);
 
     useEffect(() => {
-        // Fetch logic would go here
-        // API endpoint placeholder: `/department/student-attendance/${userData?.department}`
-    }, [userData]);
+        const fetchAttendanceData = async () => {
+            if (!currentUser) return;
+            try {
+                let dept = userData?.department;
+                if (!dept) {
+                    const hodRes = await api.get(`/department/by-hod/${currentUser.uid}`);
+                    dept = hodRes.data.department;
+                }
+                if (!dept) return;
+                const res = await api.get(`/department/student-attendance/${dept}`);
+                const data = res.data;
+                setStats(data.stats);
+                setTrendData(data.trendData);
+                setAttendanceRecords(data.attendanceRecords);
+            } catch (err) {
+                console.error("Failed to fetch attendance data", err);
+            }
+        };
+        fetchAttendanceData();
+    }, [currentUser, userData]);
 
     return (
         <div className="attendance-tracking-container">
@@ -103,7 +121,7 @@ const HODStudentAttendance = () => {
                         <span className="kpi-value">{stats.avgAttendance.toFixed(1)}%</span>
                     </div>
                     <div className={`kpi-trend ${stats.avgAttendanceDelta >= 0 ? 'positive' : 'negative'}`}>
-                        {stats.avgAttendanceDelta >= 0 ? <TrendingUp size={12}/> : <TrendingDown size={12}/>}
+                        {stats.avgAttendanceDelta >= 0 ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
                         {stats.avgAttendanceDelta > 0 ? '+' : ''}{stats.avgAttendanceDelta}% from last month
                     </div>
                 </div>
@@ -132,7 +150,7 @@ const HODStudentAttendance = () => {
                         <span className="kpi-value">{stats.belowThreshold}</span>
                     </div>
                     <div className={`kpi-trend ${stats.belowThresholdDelta <= 0 ? 'positive' : 'negative'}`}>
-                        {stats.belowThresholdDelta <= 0 ? <TrendingDown size={12}/> : <TrendingUp size={12}/>}
+                        {stats.belowThresholdDelta <= 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
                         {stats.belowThresholdDelta > 0 ? '+' : ''}{stats.belowThresholdDelta} students from last week
                     </div>
                 </div>
@@ -147,7 +165,7 @@ const HODStudentAttendance = () => {
                         <span className="kpi-value">{stats.unexcusedAbsences}</span>
                     </div>
                     <div className={`kpi-trend ${stats.unexcusedAbsencesDelta <= 0 ? 'positive' : 'negative'}`}>
-                        {stats.unexcusedAbsencesDelta <= 0 ? <TrendingDown size={12}/> : <TrendingUp size={12}/>}
+                        {stats.unexcusedAbsencesDelta <= 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
                         {stats.unexcusedAbsencesDelta > 0 ? '+' : ''}{stats.unexcusedAbsencesDelta}% from last month
                     </div>
                 </div>
@@ -202,7 +220,7 @@ const HODStudentAttendance = () => {
                                 <th>Program & Year</th>
                                 <th>Classes Attended</th>
                                 <th>Attendance %</th>
-                                <th style={{textAlign: 'right'}}>Status</th>
+                                <th style={{ textAlign: 'right' }}>Status</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -234,7 +252,7 @@ const HODStudentAttendance = () => {
                                                 {record.attendancePercent}%
                                             </span>
                                         </td>
-                                        <td style={{textAlign: 'right'}}>
+                                        <td style={{ textAlign: 'right' }}>
                                             <span className={`status-badge ${record.statusClass}`}>
                                                 {record.status}
                                             </span>

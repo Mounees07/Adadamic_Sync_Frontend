@@ -570,3 +570,79 @@
 }
 
 /* Pink */
+
+/* ── Flip Card Styles ── */
+.dashboard-flip-card {
+    background-color: transparent;
+    width: 100%;
+    min-height: 120px;
+    height: 100%;
+    perspective: 1000px;
+}
+
+.dashboard-flip-card-attendance {
+    min-height: 160px;
+    /* Attendance card is taller */
+}
+
+.dashboard-flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.dashboard-flip-card:hover .dashboard-flip-card-inner {
+    transform: rotateY(180deg);
+}
+
+.dashboard-flip-card-front,
+.dashboard-flip-card-back {
+    box-shadow: var(--shadow-subtle);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: var(--bg-card);
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.dashboard-flip-card-front {
+    padding: 20px;
+    display: flex;
+}
+
+/* Specific styling for front vs back */
+.dashboard-flip-card-back {
+    background: var(--bg-subtle);
+    transform: rotateY(180deg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.dashboard-flip-card-back-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.dashboard-flip-card-back-content {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 500;
+}

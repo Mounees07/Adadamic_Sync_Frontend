@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/api';
 import {
     ArrowLeft,
     Download,
@@ -22,12 +23,13 @@ import {
     ResponsiveContainer,
     Tooltip
 } from 'recharts';
+import Loader from '../../components/Loader';
 import './HODFacultyWorkload.css';
 
 const HODFacultyWorkload = () => {
     const navigate = useNavigate();
-    const { userData } = useAuth();
-    
+    const { currentUser, userData } = useAuth();
+
     // States for data (initialized empty/0 to avoid mock system data)
     const [stats, setStats] = useState({
         totalFaculty: 0,
@@ -39,11 +41,35 @@ const HODFacultyWorkload = () => {
 
     const [workloadRecords, setWorkloadRecords] = useState([]);
     const [distributionData, setDistributionData] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch logic would go here
-        // API endpoint placeholder: `/department/faculty-workload/${userData?.department}`
-    }, [userData]);
+        const fetchWorkloadData = async () => {
+            if (!currentUser) return;
+            try {
+                let dept = userData?.department;
+                if (!dept) {
+                    const hodRes = await api.get(`/department/by-hod/${currentUser.uid}`);
+                    dept = hodRes.data.department;
+                }
+                if (!dept) return;
+                const res = await api.get(`/department/faculty-workload/${dept}`);
+                const data = res.data;
+                setStats(data.stats);
+                setDistributionData(data.distributionData);
+                setWorkloadRecords(data.workloadRecords);
+            } catch (err) {
+                console.error("Failed to fetch faculty workload data", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchWorkloadData();
+    }, [currentUser, userData]);
+
+    if (loading) {
+        return <Loader fullScreen={false} text="Loading Faculty Workload Data..." />
+    }
 
     return (
         <div className="faculty-workload-container">
@@ -52,7 +78,7 @@ const HODFacultyWorkload = () => {
                 <ArrowLeft size={16} />
                 <span>Back to Reports</span>
             </div>
-            
+
             <header className="workload-header">
                 <div className="header-titles">
                     <h1>Faculty Workload</h1>
@@ -125,7 +151,7 @@ const HODFacultyWorkload = () => {
 
             {/* Main Content Grid */}
             <div className="workload-content-grid">
-                
+
                 {/* Left Column: Workload Details Table */}
                 <div className="workload-table-section">
                     <div className="section-header-flex">
@@ -180,7 +206,7 @@ const HODFacultyWorkload = () => {
                                             <td>
                                                 <div className="total-hrs-cell">
                                                     <span className={`total-val ${record.status === 'Overloaded' ? 'text-orange' : ''}`}>
-                                                        {record.total}<br/><span className="hrs-label">hrs</span>
+                                                        {record.total}<br /><span className="hrs-label">hrs</span>
                                                     </span>
                                                 </div>
                                             </td>
@@ -199,7 +225,7 @@ const HODFacultyWorkload = () => {
 
                 {/* Right Column: Distribution & Quick Actions */}
                 <div className="workload-side-column">
-                    
+
                     {/* Distribution Chart */}
                     <div className="side-card">
                         <h2 className="side-card-title">Overall Distribution</h2>
