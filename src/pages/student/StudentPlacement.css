@@ -99,6 +99,13 @@
 .btn-save-scores:disabled { opacity: 0.6; }
 .btn-save-scores:hover:not(:disabled) { opacity: 0.9; }
 
+.btn-resume-upload {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
 /* Body layout */
 .placement-body {
     display: grid;
@@ -184,6 +191,19 @@
     line-height: 1.4;
 }
 
+.resume-upload-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.resume-upload-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
 /* Skills */
 .skills-card {
     background: var(--bg-card);
@@ -248,7 +268,20 @@
     font-weight: 600;
 }
 
-/* Score Breakdown */
+.skill-chip.read-only {
+    cursor: default;
+}
+
+.skill-chip.read-only:hover {
+    border-color: var(--glass-border);
+    color: var(--text-muted);
+}
+
+.skill-chip.read-only.done:hover {
+    border-color: #6366f1;
+    color: #6366f1;
+}
+
 .score-breakdown-card {
     background: var(--bg-card);
     border-radius: 16px;

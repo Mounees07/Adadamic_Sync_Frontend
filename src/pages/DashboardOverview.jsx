@@ -238,9 +238,25 @@ const DashboardOverview = () => {
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_signature: response.razorpay_signature,
+                            student_uid: currentUser?.uid,
+                            amount: String(amountDue > 0 ? feeAmount : 1000),
+                            currency: currency,
+                            payment_method: 'Razorpay',
                         });
 
                         if (verifyResult.data.status === 'success') {
+                            localStorage.setItem('latest_successful_payment', JSON.stringify({
+                                transactionId: response.razorpay_payment_id,
+                                razorpayOrderId: response.razorpay_order_id,
+                                amount: String(feeAmount),
+                                currency,
+                                status: 'SUCCESS',
+                                paymentMethod: 'Razorpay',
+                                paymentDate: new Date().toISOString(),
+                                academicYear: studentProfile?.academicYear || '',
+                                semester: selectedSem || null,
+                                remarks: 'Semester fee payment',
+                            }));
                             alert("Payment Successful! 🎉");
                             setDashboardStats(prev => ({ ...prev, feesDue: 0 }));
                         }

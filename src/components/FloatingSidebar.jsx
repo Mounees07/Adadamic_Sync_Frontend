@@ -17,7 +17,8 @@ import {
     User,
     LogOut,
     DollarSign
-} from 'lucide-react';
+} 
+from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import './FloatingSidebar.css';
 
@@ -26,10 +27,11 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
 
     const studentLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
-               { to: '/student/academic', icon: <BookOpen size={22} />, label: 'Academic' },
-               { to: '/attendance', icon: <UserCheck size={22} />, label: 'Attendance' },
-               { to: '/student/leaves', icon: <FileText size={22} />, label: 'Leave Status' },
-               { to: '/academic-calendar', icon: <Calendar size={22} />, label: 'Academic Calendar' },
+        { to: '/student/academic', icon: <BookOpen size={22} />, label: 'Academic' },
+        { to: '/attendance', icon: <UserCheck size={22} />, label: 'Attendance' },
+        { to: '/student/fees', icon: <DollarSign size={22} />, label: 'Payments' },
+        { to: '/student/leaves', icon: <FileText size={22} />, label: 'Leave Status' },
+        { to: '/academic-calendar', icon: <Calendar size={22} />, label: 'Academic Calendar' },
     ];
 
     const teacherLinks = [
