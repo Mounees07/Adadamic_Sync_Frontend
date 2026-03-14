@@ -152,16 +152,16 @@ const Navbar = ({ toggleSidebar }) => {
                         )}
                     </div>
 
-                    <button className="icon-btn">
+                    <button className="icon-btn nav-secondary-action">
                         <MessageCircle size={20} />
                     </button>
 
-                    <button className="icon-btn">
+                    <button className="icon-btn nav-secondary-action">
                         <Bell size={20} />
                         <span className="notification-dot"></span>
                     </button>
 
-                    <button className="icon-btn" onClick={handleLogout} title="Logout">
+                    <button className="icon-btn nav-logout-btn" onClick={handleLogout} title="Logout">
                         <LogOut size={20} />
                     </button>
 

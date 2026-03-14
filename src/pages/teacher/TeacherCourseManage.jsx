@@ -401,6 +401,56 @@ const TeacherCourseManage = () => {
         }
     };
 
+    const getSubmissionPreviewUrl = (fileUrl) => {
+        if (!fileUrl) return null;
+
+        try {
+            const parsed = new URL(fileUrl);
+            const normalizedUrl = parsed.toString();
+
+            if (/docs\.google\.com\/document\/d\//i.test(normalizedUrl)) {
+                return normalizedUrl.replace(/\/edit(?:\?.*)?$/i, '/preview');
+            }
+
+            if (/docs\.google\.com\/presentation\/d\//i.test(normalizedUrl)) {
+                return normalizedUrl.replace(/\/edit(?:\?.*)?$/i, '/preview');
+            }
+
+            if (/drive\.google\.com\/file\/d\//i.test(normalizedUrl)) {
+                const match = normalizedUrl.match(/\/file\/d\/([^/]+)/i);
+                return match ? `https://drive.google.com/file/d/${match[1]}/preview` : normalizedUrl;
+            }
+
+            return normalizedUrl;
+        } catch (error) {
+            return fileUrl;
+        }
+    };
+
+    const getSubmissionPreviewKind = (fileUrl) => {
+        if (!fileUrl) return 'empty';
+
+        const normalizedUrl = fileUrl.toLowerCase();
+        if (/\.(png|jpe?g|gif|webp|bmp|svg)(\?|#|$)/i.test(normalizedUrl)) {
+            return 'image';
+        }
+
+        return 'document';
+    };
+
+    const getSubmissionFileName = (fileUrl) => {
+        if (!fileUrl) return 'No file attached';
+
+        try {
+            const parsed = new URL(fileUrl);
+            const pathParts = parsed.pathname.split('/').filter(Boolean);
+            const lastPart = pathParts[pathParts.length - 1];
+            return decodeURIComponent(lastPart || parsed.hostname);
+        } catch (error) {
+            return fileUrl;
+        }
+    };
+
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center gap-6" style={{ background: 'var(--bg-deep)' }}>
             <div className="text-indigo-500 animate-spin"><Settings size={64} style={{ color: 'var(--primary)' }} /></div>
@@ -759,100 +809,133 @@ const TeacherCourseManage = () => {
                 </div>
             )}
 
-            {gradingSubmission && (
-                <div className="classic-modal-overlay">
-                    <div className="classic-modal-content">
-                        <button onClick={() => setGradingSubmission(null)} className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/5 transition-colors" style={{ color: 'var(--text-secondary)' }}><X size={20} /></button>
+            {gradingSubmission && ReactDOM.createPortal(
+                <div className="classic-modal-overlay grading-modal-overlay" onClick={() => setGradingSubmission(null)}>
+                    <div className="classic-modal-content grading-modal-content" onClick={(e) => e.stopPropagation()}>
+                        <button
+                            onClick={() => setGradingSubmission(null)}
+                            className="grading-modal-close"
+                            aria-label="Close grading popup"
+                        >
+                            <X size={18} />
+                        </button>
 
-                        <div className="classic-header">
-                            <h2>
-                                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500"><Award size={24} /></div>
-                                Grade Submission
-                            </h2>
-                            <p className="text-xs font-bold uppercase tracking-widest mt-2 flex items-center gap-2" style={{ color: 'var(--text-secondary)', marginLeft: '3.5rem' }}>
-                                <span className="text-white">{gradingSubmission.student?.fullName}</span>
-                                <span className="w-1 h-1 rounded-full bg-gray-600"></span>
-                                <span>{gradingSubmission.assignment?.title}</span>
-                            </p>
-                        </div>
-
-                        <div className="mb-8 p-1 rounded-2xl border" style={{ borderColor: 'var(--glass-border)', background: 'var(--bg-subtle)' }}>
-                            <div className="flex items-center gap-4 p-4">
-                                <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-                                    <FileText size={24} />
+                        <div className="classic-header grading-modal-header">
+                            <div className="grading-modal-title-row">
+                                <div className="grading-modal-icon">
+                                    <Award size={24} />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-bold text-white mb-1">Attached Submission</h4>
-                                    <p className="text-xs text-gray-400 font-mono truncate">
-                                        {gradingSubmission.fileUrl || 'No file attached'}
-                                    </p>
-                                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mt-1">
-                                        Submitted: {new Date(gradingSubmission.submissionDate).toLocaleString()}
+                                <div>
+                                    <h2>Grade Submission</h2>
+                                    <p className="grading-modal-subtitle">
+                                        Review the submitted file, assign marks, and publish feedback in one place.
                                     </p>
                                 </div>
-                                {gradingSubmission.fileUrl && (
-                                    <a
-                                        href={gradingSubmission.fileUrl}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-blue-900/20"
-                                    >
-                                        View
-                                    </a>
-                                )}
+                            </div>
+                            <div className="grading-modal-meta">
+                                <span>{gradingSubmission.student?.fullName || 'Student'}</span>
+                                <span>{gradingSubmission.assignment?.title || 'Assignment'}</span>
+                                <span>Submitted {new Date(gradingSubmission.submissionDate).toLocaleString()}</span>
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmitGrade} className="flex flex-col">
-                            <div className="grid grid-cols-1 gap-6">
-                                <div>
-                                    <label className="classic-label">Grade (Points)</label>
-                                    <div className="relative">
-                                        <input
-                                            type="number"
-                                            className="classic-input-field font-mono text-lg font-bold"
-                                            value={gradeForm.grade}
-                                            onChange={e => setGradingSubmission({ ...gradingSubmission, grade: e.target.value }) || setGradeForm({ ...gradeForm, grade: e.target.value })}
-                                            max={gradingSubmission.assignment?.maxPoints || 100}
-                                            min="0"
-                                            required
-                                            placeholder="0"
-                                            style={{ color: 'var(--primary)' }}
-                                        />
-                                        <span className="absolute right-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Max: {gradingSubmission.assignment?.maxPoints || 100} pts
-                                        </span>
+                        <div className="grading-modal-grid">
+                            <section className="grading-preview-panel">
+                                <div className="grading-section-heading">
+                                    <span>Submitted File</span>
+                                    {gradingSubmission.fileUrl && (
+                                        <a
+                                            href={gradingSubmission.fileUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="grading-file-action"
+                                        >
+                                            Open original
+                                        </a>
+                                    )}
+                                </div>
+
+                                <div className="grading-file-summary">
+                                    <div className="grading-file-icon">
+                                        {getSubmissionPreviewKind(gradingSubmission.fileUrl) === 'image' ? <Image size={22} /> : <FileText size={22} />}
+                                    </div>
+                                    <div className="grading-file-copy">
+                                        <h4>{getSubmissionFileName(gradingSubmission.fileUrl)}</h4>
+                                        <p>{gradingSubmission.fileUrl || 'No submission link was attached for this attempt.'}</p>
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="classic-label">Feedback & Comments</label>
-                                    <textarea
-                                        className="classic-input-field min-h-[120px] resize-none"
-                                        value={gradeForm.feedback}
-                                        onChange={e => setGradeForm({ ...gradeForm, feedback: e.target.value })}
-                                        placeholder="Enter constructive feedback for the student..."
-                                        style={{ lineHeight: '1.6' }}
-                                    />
+                                <div className="grading-preview-shell">
+                                    {!gradingSubmission.fileUrl ? (
+                                        <div className="grading-preview-empty">
+                                            <FileText size={28} />
+                                            <p>No file available for preview.</p>
+                                        </div>
+                                    ) : getSubmissionPreviewKind(gradingSubmission.fileUrl) === 'image' ? (
+                                        <img
+                                            src={gradingSubmission.fileUrl}
+                                            alt="Student submission preview"
+                                            className="grading-preview-image"
+                                        />
+                                    ) : (
+                                        <iframe
+                                            title="Student submission preview"
+                                            src={getSubmissionPreviewUrl(gradingSubmission.fileUrl)}
+                                            className="grading-preview-frame"
+                                        />
+                                    )}
                                 </div>
-                            </div>
+                            </section>
 
-                            <button
-                                type="submit"
-                                className="classic-btn flex items-center justify-center gap-2"
-                                disabled={isSubmittingGrade}
-                            >
-                                {isSubmittingGrade ? (
-                                    <span className="animate-pulse">Publishing Grade...</span>
-                                ) : (
-                                    <>
-                                        <Award size={18} /> Publish Results
-                                    </>
-                                )}
-                            </button>
-                        </form>
+                            <section className="grading-form-panel">
+                                <form onSubmit={handleSubmitGrade} className="grading-modal-form">
+                                    <div>
+                                        <label className="classic-label">Grade (Points)</label>
+                                        <div className="grading-score-shell">
+                                            <input
+                                                type="number"
+                                                className="classic-input-field grading-score-input"
+                                                value={gradeForm.grade}
+                                                onChange={(e) => setGradeForm({ ...gradeForm, grade: e.target.value })}
+                                                max={gradingSubmission.assignment?.maxPoints || 100}
+                                                min="0"
+                                                required
+                                                placeholder="0"
+                                            />
+                                            <span className="grading-score-cap">
+                                                Max: {gradingSubmission.assignment?.maxPoints || 100} pts
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <label className="classic-label">Feedback & Comments</label>
+                                        <textarea
+                                            className="classic-input-field grading-feedback-input"
+                                            value={gradeForm.feedback}
+                                            onChange={(e) => setGradeForm({ ...gradeForm, feedback: e.target.value })}
+                                            placeholder="Add concise, constructive feedback for the student..."
+                                        />
+                                    </div>
+
+                                    <div className="grading-form-footer">
+                                        <div className="grading-status-note">
+                                            {gradingSubmission.grade !== null ? 'Updating an existing grade.' : 'This submission is awaiting review.'}
+                                        </div>
+                                        <button
+                                            type="submit"
+                                            className="classic-btn grading-submit-btn"
+                                            disabled={isSubmittingGrade}
+                                        >
+                                            {isSubmittingGrade ? 'Publishing Grade...' : 'Publish Results'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </section>
+                        </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Accurate Student Detail Modal Design */}

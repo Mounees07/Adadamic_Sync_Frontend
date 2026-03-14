@@ -77,21 +77,7 @@ const Mentees = () => {
         }
     };
 
-    const handleAddMentee = async (studentUid) => {
-        setAdding(true);
-        try {
-            await api.post('/users/assign-mentor', {
-                studentUid: studentUid,
-                mentorUid: currentUser.uid
-            });
-            setShowAddModal(false);
-            fetchMentees();
-        } catch (err) {
-            alert("Failed to assign mentee: " + err.message);
-        } finally {
-            setAdding(false);
-        }
-    };
+
 
 
     const handleScheduleMeeting = async (e) => {
@@ -175,10 +161,7 @@ const Mentees = () => {
                 </div>
                 <div className="header-actions">
 
-                    <button className="btn btn-primary" onClick={() => { fetchAvailableStudents(); setShowAddModal(true); }}>
-                        <UserPlus size={18} />
-                        Add Mentee
-                    </button>
+                    
                 </div>
             </header>
 

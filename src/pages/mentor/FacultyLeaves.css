@@ -1,0 +1,283 @@
+/* FacultyLeaves.css – shared across FacultyLeaves, HODLeaveApprovals, AdminLeaveApprovals */
+
+/* ── Stat Row ──────────────────────────────── */
+.fl-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.fl-stat-card {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: box-shadow 0.2s;
+}
+
+.fl-stat-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.fl-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--bg-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.fl-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.2;
+}
+
+.fl-stat-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* ── Workflow Banner ─────────────────────────── */
+.fl-workflow-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-subtle);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 20px;
+    border: 1px solid var(--glass-border);
+}
+
+.fl-wf-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.fl-wf-step.active {
+    color: var(--primary, #6366f1);
+    font-weight: 600;
+}
+
+.fl-wf-dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.fl-wf-step.active .fl-wf-dot {
+    background: var(--primary, #6366f1);
+    color: #fff;
+}
+
+/* ── Timeline ────────────────────────────────── */
+.fl-timeline {
+    border-top: 1px solid var(--glass-border);
+    padding-top: 16px;
+}
+
+.fl-timeline-step {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    position: relative;
+}
+
+.fl-timeline-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 32px;
+    width: 2px;
+    height: calc(100% - 10px);
+    background: var(--glass-border);
+}
+
+.fl-tl-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.fl-timeline-step.done .fl-tl-dot {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10b981;
+}
+
+.fl-timeline-step.fail .fl-tl-dot {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
+}
+
+.fl-timeline-step.waiting .fl-tl-dot {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+}
+
+.fl-tl-title {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.fl-tl-sub {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+.fl-tl-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* ── Buttons ────────────────────────────────── */
+.btn-secondary-action {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 0.6rem 1.2rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-secondary-action:hover {
+    background: var(--bg-subtle);
+}
+
+.btn-icon-danger {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #ef4444;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s;
+}
+
+.btn-icon-danger:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+.btn-approve {
+    background: #10b981;
+    color: #fff;
+    border: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-approve:hover {
+    background: #059669;
+}
+
+.btn-reject {
+    background: transparent;
+    border: 1px solid #ef4444;
+    color: #ef4444;
+    padding: 0.4rem 0.9rem;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.btn-reject:hover {
+    background: rgba(239, 68, 68, 0.1);
+}
+
+/* ── Spin animation ─────────────────────────── */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Applicant badge ─────────────────────────── */
+.applicant-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.applicant-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.applicant-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.applicant-role {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+/* ── HOD Approved step only ─────────────────── */
+.status-pill.hod-approved {
+    background: rgba(99, 102, 241, 0.15);
+    color: #6366f1;
+}
+
+/* ── Responsive ─────────────────────────────── */
+@media (max-width: 768px) {
+    .fl-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .fl-stats-row {
+        grid-template-columns: 1fr;
+    }
+}

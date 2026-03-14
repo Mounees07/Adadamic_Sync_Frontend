@@ -22,8 +22,10 @@
     .navbar {
         width: 100%;
         left: 0;
-        padding: 0 20px;
+        padding: 0 16px;
         background-color: var(--bg-card);
+        height: 64px;
+        border-bottom: 1px solid var(--glass-border);
     }
 }
 
@@ -122,6 +124,12 @@
     box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
 }
 
+@media (max-width: 768px) {
+    .nav-back-floating {
+        display: none;
+    }
+}
+
 /* Search Bar - Theme Aware Glass Style */
 .search-bar {
     display: flex;
@@ -175,7 +183,19 @@
 .nav-actions {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 12px;
+}
+
+@media (max-width: 768px) {
+    .nav-actions {
+        gap: 4px;
+    }
+}
+
+@media (max-width: 480px) {
+    .nav-secondary-action {
+        display: none;
+    }
 }
 
 /* Icon Buttons - Clean Ghost Style */
@@ -327,10 +347,19 @@
 .user-role {
     font-size: 0.7rem;
     color: var(--primary);
-    /* Highlight role */
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+@media (max-width: 768px) {
+    .user-info {
+        display: none;
+    }
+    .user-profile {
+        padding: 6px;
+        margin-left: 0;
+    }
 }
 
 .avatar {

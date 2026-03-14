@@ -47,7 +47,8 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Dashboard' },
         { to: '/teacher/courses', icon: <BookOpen size={22} />, label: 'My Courses' },
         { to: '/mentees', icon: <Users size={22} />, label: 'Mentees' },
-        { to: '/mentor/leaves', icon: <ClipboardList size={22} />, label: 'Leaves' },
+        { to: '/mentor/leaves', icon: <ClipboardList size={22} />, label: 'Student Leaves' },
+        { to: '/faculty-leaves', icon: <FileText size={22} />, label: 'My Leave' },
         { to: '/meetings', icon: <Calendar size={22} />, label: 'Meetings' },
         { to: '/schedule', icon: <Calendar size={22} />, label: 'Schedule' },
     ];
@@ -56,6 +57,8 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Dashboard' },
         { to: '/department-analytics', icon: <TrendingUp size={22} />, label: 'Analytics' },
         { to: '/mentorship-management', icon: <UserCheck size={22} />, label: 'Mentorship' },
+        { to: '/hod/faculty-leaves', icon: <ClipboardList size={22} />, label: 'Leave Approvals' },
+        { to: '/faculty-leaves', icon: <FileText size={22} />, label: 'My Leave' },
         { to: '/hod/schedule-upload', icon: <Calendar size={22} />, label: 'Timetable' },
     ];
 
@@ -64,6 +67,7 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/admin/students', icon: <GraduationCap size={22} />, label: 'Students' },
         { to: '/admin/users', icon: <Users size={22} />, label: 'User Management' },
         { to: '/admin/finance', icon: <DollarSign size={22} />, label: 'Finance' },
+        { to: '/admin/faculty-leaves', icon: <ClipboardList size={22} />, label: 'Faculty Leaves' },
         { to: '/calendar', icon: <Calendar size={22} />, label: 'Calendar' },
         { to: '/admin/courses', icon: <BookOpen size={22} />, label: 'Courses' },
         { to: '/admin/reports', icon: <FileText size={22} />, label: 'Reports' },

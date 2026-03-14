@@ -481,3 +481,247 @@
 .crud-btn.delete:hover {
     background: rgba(239, 68, 68, 0.2);
 }
+
+/* ============================================================
+   RESPONSIVE — LAPTOP (769px – 1200px)
+   ============================================================ */
+@media (max-width: 1200px) {
+    .hod-faculty-container-new {
+        padding: 20px 24px;
+    }
+
+    .faculty-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .hod-top-nav-shared {
+        margin: -20px -24px 24px -24px;
+    }
+
+    .search-bar-container-shared {
+        width: 240px;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET (481px – 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+    .hod-faculty-container-new {
+        padding: 16px;
+    }
+
+    .hod-top-nav-shared {
+        margin: -16px -16px 20px -16px;
+        padding: 10px 16px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .search-bar-container-shared {
+        width: 100%;
+        order: 2;
+        flex: 1 1 100%;
+    }
+
+    .nav-actions-shared {
+        order: 1;
+    }
+
+    .faculty-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .faculty-page-header h1 {
+        font-size: 20px;
+    }
+
+    .export-csv-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .faculty-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .f-stat-value {
+        font-size: 24px;
+    }
+
+    /* Toolbar: stack tabs above search */
+    .directory-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        padding: 12px 16px 0;
+    }
+
+    .directory-tabs {
+        overflow-x: auto;
+        gap: 12px;
+        padding-bottom: 4px;
+    }
+
+    .directory-tabs::-webkit-scrollbar {
+        height: 3px;
+    }
+
+    .dir-tab {
+        white-space: nowrap;
+        font-size: 13px;
+    }
+
+    .directory-search {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    /* Table: hide less important columns on tablet */
+    .directory-table th:nth-child(3),
+    .directory-table td:nth-child(3) {
+        display: none;
+    }
+
+    .directory-table th,
+    .directory-table td {
+        padding: 12px 14px;
+    }
+
+    .directory-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE (≤ 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+    .hod-faculty-container-new {
+        padding: 12px;
+    }
+
+    .hod-top-nav-shared {
+        margin: -12px -12px 16px -12px;
+        padding: 8px 12px;
+    }
+
+    .faculty-page-header h1 {
+        font-size: 18px;
+    }
+
+    .faculty-page-header p {
+        font-size: 13px;
+    }
+
+    /* 2 stat cards per row on mobile */
+    .faculty-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .f-stat-card {
+        padding: 14px;
+    }
+
+    .f-stat-value {
+        font-size: 22px;
+    }
+
+    .f-stat-label {
+        font-size: 11px;
+    }
+
+    /* Convert table to card list on mobile */
+    .directory-table-wrapper {
+        overflow-x: unset;
+    }
+
+    .directory-table thead {
+        display: none;
+    }
+
+    .directory-table,
+    .directory-table tbody,
+    .directory-table tr,
+    .directory-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .directory-table tr {
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        margin: 8px 12px;
+        padding: 12px;
+        background: var(--bg-card);
+        width: calc(100% - 24px);
+    }
+
+    .directory-table td {
+        padding: 4px 0;
+        border-bottom: none;
+    }
+
+    /* Hide specialization & contact on very small screens */
+    .directory-table td:nth-child(2),
+    .directory-table td:nth-child(3) {
+        display: none;
+    }
+
+    /* Status and action side-by-side */
+    .directory-table td:nth-child(4),
+    .directory-table td:nth-child(5) {
+        display: inline-block;
+        width: auto;
+        padding: 6px 0 2px;
+    }
+
+    .action-cell-right {
+        text-align: left;
+        margin-left: 8px;
+    }
+
+    .personnel-cell {
+        gap: 10px;
+    }
+
+    .personnel-avatar {
+        width: 36px;
+        height: 36px;
+        font-size: 12px;
+    }
+
+    .directory-tabs {
+        gap: 8px;
+    }
+
+    .dir-tab {
+        font-size: 12px;
+        padding: 0 0 10px 0;
+    }
+
+    .directory-footer {
+        flex-direction: column;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .showing-info {
+        font-size: 12px;
+    }
+
+    .pagination-controls {
+        width: 100%;
+        justify-content: flex-end;
+    }
+}

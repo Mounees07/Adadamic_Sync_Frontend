@@ -61,16 +61,15 @@
 @media (max-width: 768px) {
     .main-content {
         margin-left: 0;
-        /* Navbar is still fixed top, so we keep padding-top */
+        padding-top: 80px; /* 64px navbar + 16px gap */
     }
 
     .page-content {
-        padding: 20px;
+        padding: 16px;
     }
 
     .page-logo-container {
         display: none;
-        /* Hide on mobile as sidebar might change behavior or rely on top navbar */
     }
 
     .mobile-sidebar-overlay {

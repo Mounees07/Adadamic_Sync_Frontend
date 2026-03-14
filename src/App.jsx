@@ -71,6 +71,9 @@ const GateStudentEntry = React.lazy(() => import('./pages/gate/GateStudentEntry'
 const GateDashboard = React.lazy(() => import('./pages/gate/GateDashboard'));
 const VisitorLog = React.lazy(() => import('./pages/gate/VisitorLog'));
 const MyProfile = React.lazy(() => import('./pages/MyProfile'));
+const FacultyLeaves = React.lazy(() => import('./pages/mentor/FacultyLeaves'));
+const HODLeaveApprovals = React.lazy(() => import('./pages/hod/HODLeaveApprovals'));
+const AdminLeaveApprovals = React.lazy(() => import('./pages/admin/AdminLeaveApprovals'));
 import './App.css';
 
 // ... existing code ...
@@ -201,6 +204,7 @@ function App() {
                     <Route path="mentees" element={<Mentees />} />
                     <Route path="mentor/leaves" element={<MentorLeaves />} />
                     <Route path="mentor/attendance" element={<MentorAttendance />} />
+                    <Route path="faculty-leaves" element={<FacultyLeaves />} />
                     <Route path="performance-reports" element={<div>Mentee Performance Analytics (Coming Soon)</div>} />
                     <Route path="meetings" element={<MentorMeetings />} />
 
@@ -210,6 +214,7 @@ function App() {
                     <Route path="students-directory" element={<HODStudents />} />
                     <Route path="hod/schedule-upload" element={<HODScheduleUpload />} />
                     <Route path="hod/meetings" element={<HODMeetings />} />
+                    <Route path="hod/faculty-leaves" element={<HODLeaveApprovals />} />
                     <Route path="curriculum" element={<HODCurriculum />} />
                     <Route path="department-analytics" element={<HODAnalytics />} />
                     <Route path="department-analytics/academic-performance" element={<HODAcademicPerformance />} />
@@ -237,6 +242,7 @@ function App() {
                     <Route path="admin/reports" element={<AdminDataReports />} />
                     <Route path="admin/settings" element={<AdminSettings />} />
                     <Route path="admin/finance" element={<AdminFinance />} />
+                    <Route path="admin/faculty-leaves" element={<AdminLeaveApprovals />} />
 
 
 

@@ -189,6 +189,25 @@ body.dark .f-tooltip::before,
     background-color: rgba(239, 68, 68, 0.15);
 }
 
+/* Tablet responsive styles */
+@media (max-width: 1024px) {
+    .floating-sidebar {
+        left: 16px;
+        top: 96px;
+        bottom: 16px;
+        width: 72px;
+        border-radius: 32px;
+        padding: 24px 0;
+    }
+
+    .f-nav-link,
+    .logout-btn-pill {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+    }
+}
+
 /* Mobile responsive styles */
 @media (max-width: 768px) {
     .floating-sidebar {
@@ -201,7 +220,7 @@ body.dark .f-tooltip::before,
         transform: translateX(-100%);
         padding: 40px 16px;
         align-items: flex-start;
-        background-color: var(--bg-card); /* Should be solid enough */
+        background-color: var(--bg-card);
         box-shadow: 4px 0 24px rgba(0,0,0,0.1);
     }
     
@@ -222,7 +241,7 @@ body.dark .f-tooltip::before,
         justify-content: flex-start;
         padding: 0 16px;
         border-radius: 12px;
-        gap: 16px; /* Space between icon and text */
+        gap: 16px;
     }
 
     /* Show tooltip text as standard text in drawer */
@@ -242,18 +261,17 @@ body.dark .f-tooltip::before,
     }
     
     .f-tooltip::before {
-        display: none; /* Hide the arrow */
+        display: none;
     }
 
     .f-nav-link.active .f-tooltip {
-        color: white; /* match active state */
+        color: white;
     }
     
     body.dark .f-tooltip,
     [data-theme='dark'] .f-tooltip,
     body.dark .f-nav-link.active .f-tooltip,
     [data-theme='dark'] .f-nav-link.active .f-tooltip {
-        /* Maintain colors in tooltip when drawn inline */
         color: inherit;
         background: transparent;
         box-shadow: none;

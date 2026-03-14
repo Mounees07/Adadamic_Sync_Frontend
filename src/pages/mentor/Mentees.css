@@ -439,3 +439,211 @@
 .edit-grid .form-group {
     margin-bottom: 0;
 }
+
+/* ============================================================
+   RESPONSIVE — LAPTOP (769px – 1200px)
+   ============================================================ */
+@media (max-width: 1200px) {
+    .mentees-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — TABLET (481px – 768px)
+   ============================================================ */
+@media (max-width: 768px) {
+    .mentees-page {
+        padding: 16px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .header-actions > * {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .mentee-controls {
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px;
+        margin-bottom: 16px;
+    }
+
+    .search-bar {
+        flex: 1 1 100%;
+        order: 1;
+    }
+
+    .mentees-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .mentee-card {
+        padding: 16px;
+        gap: 14px;
+    }
+
+    .mentee-card-header {
+        gap: 12px;
+    }
+
+    .mentee-avatar {
+        width: 44px;
+        height: 44px;
+        font-size: 1.2rem;
+    }
+
+    .mentee-metrics {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .metric {
+        flex: 1 1 calc(50% - 6px);
+    }
+
+    .modal-content {
+        max-width: 95vw;
+        padding: 24px;
+    }
+
+    .detail-header {
+        gap: 14px;
+    }
+
+    .detail-avatar {
+        width: 64px;
+        height: 64px;
+        border-radius: 16px;
+        font-size: 1.6rem;
+    }
+
+    .action-buttons-row {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .edit-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE — MOBILE (≤ 480px)
+   ============================================================ */
+@media (max-width: 480px) {
+    .mentees-page {
+        padding: 12px;
+    }
+
+    .page-header {
+        margin-bottom: 16px;
+    }
+
+    .mentees-grid {
+        gap: 12px;
+    }
+
+    .mentee-card {
+        padding: 14px;
+        gap: 12px;
+        border-radius: 12px;
+    }
+
+    .mentee-card-header {
+        gap: 10px;
+    }
+
+    .mentee-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        border-radius: 10px;
+    }
+
+    .mentee-main-info h3 {
+        font-size: 1rem;
+    }
+
+    .mentee-academic-info {
+        font-size: 0.75rem;
+        gap: 8px;
+    }
+
+    .mentee-metrics {
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .metric-value {
+        font-size: 0.95rem;
+    }
+
+    .metric-label {
+        font-size: 0.7rem;
+    }
+
+    /* Modal becomes bottom sheet on mobile */
+    .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .modal-content {
+        max-width: 100%;
+        border-radius: 20px 20px 0 0;
+        padding: 20px;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .detail-modal {
+        max-width: 100%;
+    }
+
+    .student-detail-view {
+        max-height: 65vh;
+    }
+
+    .detail-header {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+    }
+
+    .detail-avatar {
+        width: 56px;
+        height: 56px;
+        font-size: 1.3rem;
+        border-radius: 14px;
+    }
+
+    .info-row {
+        font-size: 0.85rem;
+        flex-direction: column;
+        gap: 2px;
+        padding: 6px 0;
+    }
+
+    .info-row strong {
+        font-size: 0.85rem;
+    }
+
+    .student-list {
+        max-height: 300px;
+    }
+}

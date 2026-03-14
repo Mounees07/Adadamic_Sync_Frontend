@@ -217,31 +217,31 @@ const TeacherGrading = () => {
             {gradingSubmission && (
                 <div className="classic-modal-overlay">
                     <div className="classic-modal-content">
-                        <button onClick={() => setGradingSubmission(null)} className="absolute top-6 right-6 p-2 rounded-full hover:bg-white/5 transition-colors" style={{ color: 'var(--text-secondary)' }}><X size={20} /></button>
+                        <button onClick={() => setGradingSubmission(null)} className="grading-modal-close"><X size={18} /></button>
 
                         <div className="classic-header">
                             <h2>
-                                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-500"><Award size={24} /></div>
+                                <div className="grading-modal-icon"><Award size={22} /></div>
                                 Grade Submission
                             </h2>
-                            <p className="text-xs font-bold uppercase tracking-widest mt-2 flex items-center gap-2" style={{ color: 'var(--text-secondary)', marginLeft: '3.5rem' }}>
-                                <span className="text-white">{gradingSubmission.student?.fullName}</span>
-                                <span className="w-1 h-1 rounded-full bg-gray-600"></span>
+                            <p className="grading-modal-subtitle">
+                                <span className="grading-modal-student">{gradingSubmission.student?.fullName}</span>
+                                <span className="grading-modal-divider"></span>
                                 <span>{gradingSubmission.assignment?.title}</span>
                             </p>
                         </div>
 
-                        <div className="mb-8 p-1 rounded-2xl border" style={{ borderColor: 'var(--glass-border)', background: 'var(--bg-subtle)' }}>
-                            <div className="flex items-center gap-4 p-4">
-                                <div className="h-12 w-12 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                        <div className="grading-submission-card">
+                            <div className="grading-submission-body">
+                                <div className="grading-submission-icon">
                                     <FileText size={24} />
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                    <h4 className="text-sm font-bold text-white mb-1">Attached Submission</h4>
-                                    <p className="text-xs text-gray-400 font-mono truncate">
+                                <div className="grading-submission-copy">
+                                    <h4>Attached Submission</h4>
+                                    <p className="grading-submission-link">
                                         {gradingSubmission.fileUrl || 'No file attached'}
                                     </p>
-                                    <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mt-1">
+                                    <p className="grading-submission-time">
                                         Submitted: {new Date(gradingSubmission.submissionDate).toLocaleString()}
                                     </p>
                                 </div>
@@ -250,19 +250,19 @@ const TeacherGrading = () => {
                                         href={gradingSubmission.fileUrl}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-lg shadow-blue-900/20"
+                                        className="grading-submission-action"
                                     >
-                                        View
+                                        Open file
                                     </a>
                                 )}
                             </div>
                         </div>
 
-                        <form onSubmit={handleSubmitGrade} className="flex flex-col">
-                            <div className="grid grid-cols-1 gap-6">
-                                <div>
+                        <form onSubmit={handleSubmitGrade} className="grading-modal-form">
+                            <div className="grading-form-grid">
+                                <div className="grading-form-section">
                                     <label className="classic-label">Grade (Points)</label>
-                                    <div className="relative">
+                                    <div className="grading-score-wrap">
                                         <input
                                             type="number"
                                             className="classic-input-field font-mono text-lg font-bold"
@@ -274,13 +274,11 @@ const TeacherGrading = () => {
                                             placeholder="0"
                                             style={{ color: 'var(--primary)' }}
                                         />
-                                        <span className="absolute right-4 top-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                                            Max: {gradingSubmission.assignment?.maxPoints || 100} pts
-                                        </span>
                                     </div>
+                                    <div className="grading-score-meta">Maximum score: {gradingSubmission.assignment?.maxPoints || 100} pts</div>
                                 </div>
 
-                                <div>
+                                <div className="grading-form-section">
                                     <label className="classic-label">Feedback & Comments</label>
                                     <textarea
                                         className="classic-input-field min-h-[120px] resize-none"

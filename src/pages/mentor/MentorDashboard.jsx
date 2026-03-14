@@ -8,6 +8,54 @@ import api from '../../utils/api';
 import { Hourglass } from 'ldrs/react';
 import 'ldrs/react/Hourglass.css';
 
+const isPresentStatus = (status) => ['P', 'PRESENT', 'L', 'LATE'].includes(String(status || '').toUpperCase());
+
+const getRelativeDateLabel = (value) => {
+    if (!value) return 'No due date';
+
+    const target = new Date(value);
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startOfTarget = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+    const diffDays = Math.round((startOfTarget - startOfToday) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays === -1) return 'Yesterday';
+    if (diffDays > 1 && diffDays < 7) return `In ${diffDays} days`;
+    if (diffDays < -1) return `${Math.abs(diffDays)} days ago`;
+    return target.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+};
+
+const getTaskColumnForDate = (value) => {
+    if (!value) return 'This Week';
+
+    const target = new Date(value);
+    const today = new Date();
+    const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const startOfTarget = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+    const diffDays = Math.round((startOfTarget - startOfToday) / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 1) return 'Upcoming';
+    if (diffDays <= 7) return 'This Week';
+    return 'Later';
+};
+
+const isLaboratorySection = (section) => {
+    const course = section?.course || {};
+    const haystack = [
+        course.category,
+        course.name,
+        course.code,
+        section?.sectionName
+    ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+    return ['lab', 'laboratory', 'practical', 'workshop'].some(keyword => haystack.includes(keyword));
+};
+
 const MentorDashboard = () => {
     const { currentUser, userData } = useAuth();
     const location = useLocation();
@@ -15,6 +63,7 @@ const MentorDashboard = () => {
 
     const [activeTab, setActiveTab] = useState('Faculty');
     const [activeMenteeFilter, setActiveMenteeFilter] = useState('All');
+    const [activeFacultyClassFilter, setActiveFacultyClassFilter] = useState('All');
 
     // Log Attendance States
     const [isLoggingAttendance, setIsLoggingAttendance] = useState(false);
@@ -198,7 +247,21 @@ const MentorDashboard = () => {
         sessionsThisMonth: 0,
         lowGpaCount: 0,
         activeCourses: 0,
-        totalStudentsTaught: 0
+        totalStudentsTaught: 0,
+        pendingGrading: 0
+    });
+    const [facultyDashboard, setFacultyDashboard] = useState({
+        averageAttendance: null,
+        assignmentsPublished: 0,
+        pendingApprovals: 0,
+        attendanceAlerts: 0,
+        classItems: [],
+        taskBoard: {
+            Upcoming: [],
+            'This Week': [],
+            Later: []
+        },
+        recentActivity: []
     });
 
     useEffect(() => {
@@ -211,28 +274,54 @@ const MentorDashboard = () => {
         const fetchDashboardData = async () => {
             if (!currentUser) return;
             try {
-                // Fetch mentees
-                const menteesRes = await api.get(`/users/mentees/${currentUser.uid}`);
+                const [menteesRes, meetingsRes, sectionsRes, pendingLeavesRes] = await Promise.all([
+                    api.get(`/users/mentees/${currentUser.uid}`).catch(() => ({ data: [] })),
+                    api.get(`/meetings/mentor/${currentUser.uid}`).catch(() => ({ data: [] })),
+                    api.get(`/courses/sections/faculty/${currentUser.uid}`).catch(() => ({ data: [] })),
+                    api.get(`/leaves/pending/${currentUser.uid}`).catch(() => ({ data: [] }))
+                ]);
+
                 const menteesData = menteesRes.data || [];
-
-                // Fetch meetings
-                const meetingsRes = await api.get(`/meetings/mentor/${currentUser.uid}`);
                 const meetingsData = meetingsRes.data || [];
-
-                // Fetch faculty sections
-                const sectionsRes = await api.get(`/courses/sections/faculty/${currentUser.uid}`);
                 const sectionsData = sectionsRes.data || [];
+                const pendingLeaves = (pendingLeavesRes.data || []).filter(leave => leave?.mentorStatus === 'PENDING');
 
                 setMentees(menteesData);
                 setMeetings(meetingsData);
                 setFacultySections(sectionsData);
 
-                // Calculate stats
-                const today = new Date().toDateString();
-                const currentMonth = new Date().getMonth();
+                const sectionDetails = await Promise.all(
+                    sectionsData.map(async (section) => {
+                        const [assignmentsRes, submissionsRes, sessionsRes] = await Promise.all([
+                            api.get(`/assignments/section/${section.id}`).catch(() => ({ data: [] })),
+                            api.get(`/assignments/teacher/section/${section.id}/submissions`).catch(() => ({ data: [] })),
+                            api.get(`/course-attendance/sessions/section/${section.id}`).catch(() => ({ data: [] }))
+                        ]);
+
+                        const sessionsWithAttendance = await Promise.all(
+                            (sessionsRes.data || []).map(async (session) => {
+                                const attendancesRes = await api.get(`/course-attendance/sessions/${session.id}/attendances`).catch(() => ({ data: [] }));
+                                return {
+                                    ...session,
+                                    attendances: attendancesRes.data || []
+                                };
+                            })
+                        );
+
+                        return {
+                            section,
+                            assignments: assignmentsRes.data || [],
+                            submissions: submissionsRes.data || [],
+                            sessions: sessionsWithAttendance
+                        };
+                    })
+                );
+
+                const now = new Date();
+                const currentMonth = now.getMonth();
 
                 const pendingCount = meetingsData.filter(m =>
-                    m.status === 'SCHEDULED' && new Date(m.startTime).toDateString() >= today
+                    m.status === 'SCHEDULED' && new Date(m.startTime) >= now
                 ).length;
 
                 const sessionsThisMonth = meetingsData.filter(m =>
@@ -250,8 +339,155 @@ const MentorDashboard = () => {
                 }).length;
 
                 const totalStudentsTaught = sectionsData.reduce((sum, sec) => sum + (sec.enrollmentCount || 0), 0);
-                // Simple mock logic for pending grading (just count sections)
-                const pendingGradingCount = sectionsData.length * 2;
+                const allAssignments = sectionDetails.flatMap(detail =>
+                    detail.assignments.map(assignment => ({ ...assignment, section: detail.section }))
+                );
+                const allSubmissions = sectionDetails.flatMap(detail =>
+                    detail.submissions.map(submission => ({ ...submission, section: detail.section }))
+                );
+                const allSessions = sectionDetails.flatMap(detail =>
+                    detail.sessions.map(session => ({ ...session, section: detail.section }))
+                );
+                const pendingGradingCount = allSubmissions.filter(submission => submission.grade === null || submission.grade === undefined).length;
+
+                let attendanceSum = 0;
+                let attendanceSamples = 0;
+                sectionDetails.forEach(detail => {
+                    const enrolled = detail.section.enrollmentCount || 0;
+                    detail.sessions.forEach(session => {
+                        if (!enrolled) return;
+                        const presentCount = (session.attendances || []).filter(att => isPresentStatus(att.status)).length;
+                        attendanceSum += (presentCount / enrolled) * 100;
+                        attendanceSamples += 1;
+                    });
+                });
+
+                const averageAttendance = attendanceSamples > 0 ? Math.round(attendanceSum / attendanceSamples) : null;
+                const attendanceAlerts = sectionDetails.filter(detail => {
+                    const latestSession = [...detail.sessions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+                    const enrolled = detail.section.enrollmentCount || 0;
+                    if (!latestSession || !enrolled) return false;
+                    const presentCount = (latestSession.attendances || []).filter(att => isPresentStatus(att.status)).length;
+                    return ((presentCount / enrolled) * 100) < 75;
+                }).length;
+
+                const classItems = sectionDetails.map((detail, index) => {
+                    const { section, assignments, submissions, sessions } = detail;
+                    const pendingForSection = submissions.filter(sub => sub.grade === null || sub.grade === undefined).length;
+                    const isLab = isLaboratorySection(section);
+                    const nextAssignment = [...assignments]
+                        .filter(assignment => assignment.dueDate && new Date(assignment.dueDate) >= now)
+                        .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))[0];
+                    const latestSession = [...sessions].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
+                    const enrolled = section.enrollmentCount || 0;
+                    const latestAttendanceRate = latestSession && enrolled
+                        ? Math.round(((latestSession.attendances || []).filter(att => isPresentStatus(att.status)).length / enrolled) * 100)
+                        : null;
+
+                    let badgeClass = 'on-track';
+                    let badgeText = 'On track';
+                    let statusText = 'No active items right now';
+
+                    if (pendingForSection > 0) {
+                        badgeClass = 'high-priority';
+                        badgeText = 'Action required';
+                        statusText = `${pendingForSection} submission${pendingForSection > 1 ? 's' : ''} pending grading`;
+                    } else if (nextAssignment) {
+                        badgeClass = 'met-recently border-only';
+                        badgeText = getRelativeDateLabel(nextAssignment.dueDate);
+                        statusText = `Next deadline: ${nextAssignment.title}`;
+                    } else if (latestAttendanceRate !== null) {
+                        statusText = `Latest attendance recorded at ${latestAttendanceRate}%`;
+                    }
+
+                    return {
+                        id: section.id || index,
+                        code: section.course?.code || '',
+                        name: section.course?.name || 'Untitled course',
+                        semester: section.semester ? `Sem ${section.semester}` : 'Current semester',
+                        department: section.course?.department || '',
+                        sectionKind: isLab ? 'lab' : 'lecture',
+                        pendingGradingCount: pendingForSection,
+                        badgeClass,
+                        badgeText,
+                        statusText
+                    };
+                });
+
+                const liveTasks = [];
+                sectionDetails.forEach(detail => {
+                    const pendingByAssignment = detail.submissions.reduce((acc, submission) => {
+                        if (submission.grade !== null && submission.grade !== undefined) return acc;
+                        const assignmentId = submission.assignment?.id;
+                        if (!assignmentId) return acc;
+                        if (!acc[assignmentId]) {
+                            acc[assignmentId] = {
+                                id: `assignment-${assignmentId}`,
+                                title: `Grade ${submission.assignment?.title || 'assignment'}`,
+                                description: `${detail.section.course?.code || 'Course'}: ${submission.assignment?.title || 'Untitled assignment'}`,
+                                count: 0,
+                                dueDate: submission.assignment?.dueDate || ''
+                            };
+                        }
+                        acc[assignmentId].count += 1;
+                        return acc;
+                    }, {});
+
+                    Object.values(pendingByAssignment).forEach(task => {
+                        liveTasks.push({
+                            ...task,
+                            description: `${task.count} submission${task.count > 1 ? 's' : ''} waiting for grading`,
+                            column: getTaskColumnForDate(task.dueDate)
+                        });
+                    });
+                });
+
+                pendingLeaves.forEach(leave => {
+                    liveTasks.push({
+                        id: `leave-${leave.id}`,
+                        title: `Review leave for ${leave.student?.fullName || 'student'}`,
+                        description: `${leave.leaveType || 'Leave'} request starting ${leave.fromDate || 'soon'}`,
+                        dueDate: leave.fromDate || '',
+                        column: getTaskColumnForDate(leave.fromDate)
+                    });
+                });
+
+                const taskBoard = {
+                    Upcoming: liveTasks.filter(task => task.column === 'Upcoming').slice(0, 6),
+                    'This Week': liveTasks.filter(task => task.column === 'This Week').slice(0, 6),
+                    Later: liveTasks.filter(task => task.column === 'Later').slice(0, 6)
+                };
+
+                const recentActivity = [
+                    ...allSessions.map(session => {
+                        const enrolled = session.section?.enrollmentCount || 0;
+                        const presentCount = (session.attendances || []).filter(att => isPresentStatus(att.status)).length;
+                        const absentees = Math.max(enrolled - presentCount, 0);
+                        return {
+                            id: `attendance-${session.id}`,
+                            occurredAt: session.createdAt,
+                            title: `Attendance recorded for ${session.section?.course?.code || 'course'}`,
+                            description: enrolled
+                                ? `${presentCount}/${enrolled} present, ${absentees} absent`
+                                : `${presentCount} student${presentCount !== 1 ? 's' : ''} marked`
+                        };
+                    }),
+                    ...allSubmissions.map(submission => ({
+                        id: `submission-${submission.id}`,
+                        occurredAt: submission.submissionDate,
+                        title: `Submission received in ${submission.section?.course?.code || 'course'}`,
+                        description: `${submission.student?.fullName || 'A student'} submitted ${submission.assignment?.title || 'work'}`
+                    })),
+                    ...pendingLeaves.map(leave => ({
+                        id: `leave-activity-${leave.id}`,
+                        occurredAt: leave.createdAt,
+                        title: `Leave request from ${leave.student?.fullName || 'student'}`,
+                        description: `${leave.leaveType || 'Leave'} request pending mentor approval`
+                    }))
+                ]
+                    .filter(item => item.occurredAt)
+                    .sort((a, b) => new Date(b.occurredAt) - new Date(a.occurredAt))
+                    .slice(0, 5);
 
                 setStats({
                     activeMentees: menteesData.length,
@@ -265,6 +501,15 @@ const MentorDashboard = () => {
                     totalStudentsTaught: totalStudentsTaught,
                     pendingGrading: pendingGradingCount
                 });
+                setFacultyDashboard({
+                    averageAttendance,
+                    assignmentsPublished: allAssignments.length,
+                    pendingApprovals: pendingLeaves.length,
+                    attendanceAlerts,
+                    classItems,
+                    taskBoard,
+                    recentActivity
+                });
 
             } catch (err) {
                 console.error("Error fetching mentor dashboard data:", err);
@@ -274,6 +519,8 @@ const MentorDashboard = () => {
         };
 
         fetchDashboardData();
+        const refreshInterval = setInterval(fetchDashboardData, 30000);
+        return () => clearInterval(refreshInterval);
     }, [currentUser]);
 
     useEffect(() => {
@@ -467,6 +714,14 @@ const MentorDashboard = () => {
     }
 
     const isFaculty = activeTab === 'Faculty';
+    const facultyTaskColumns = facultyDashboard.taskBoard || { Upcoming: [], 'This Week': [], Later: [] };
+    const filteredFacultyClassItems = facultyDashboard.classItems.filter((section) => {
+        if (activeFacultyClassFilter === 'All') return true;
+        if (activeFacultyClassFilter === 'Pending grading') return section.pendingGradingCount > 0;
+        if (activeFacultyClassFilter === 'Laboratories') return section.sectionKind === 'lab';
+        if (activeFacultyClassFilter === 'Lectures') return section.sectionKind === 'lecture';
+        return true;
+    });
 
     const handleLogAttendanceClick = () => {
         setIsLoggingAttendance(true);
@@ -1712,7 +1967,7 @@ const MentorDashboard = () => {
                             ) : getColTasks('Upcoming').slice(0, 2).map((t, i) => (
                                 <div className="kanban-card" key={i}>
                                     <h4>{t.title}</h4>
-                                    <p>{t.description ? (t.description.length > 20 ? t.description.substring(0, 20) + '...' : t.description) : 'No description'}</p>
+                                    <p>{t.description ? (t.description.length > 40 ? t.description.substring(0, 40) + '...' : t.description) : 'No description'}</p>
                                 </div>
                             ))}
                         </div>
@@ -1726,7 +1981,7 @@ const MentorDashboard = () => {
                             ) : getColTasks('This Week').slice(0, 2).map((t, i) => (
                                 <div className="kanban-card highlight" key={i}>
                                     <h4>{t.title}</h4>
-                                    <p>{t.description ? (t.description.length > 20 ? t.description.substring(0, 20) + '...' : t.description) : 'No description'}</p>
+                                    <p>{t.description ? (t.description.length > 40 ? t.description.substring(0, 40) + '...' : t.description) : 'No description'}</p>
                                 </div>
                             ))}
                         </div>
@@ -1740,7 +1995,7 @@ const MentorDashboard = () => {
                             ) : getColTasks('Later').slice(0, 2).map((t, i) => (
                                 <div className="kanban-card" key={i}>
                                     <h4>{t.title}</h4>
-                                    <p>{t.description ? (t.description.length > 20 ? t.description.substring(0, 20) + '...' : t.description) : 'No description'}</p>
+                                    <p>{t.description ? (t.description.length > 40 ? t.description.substring(0, 40) + '...' : t.description) : 'No description'}</p>
                                 </div>
                             ))}
                         </div>
@@ -1814,7 +2069,7 @@ const MentorDashboard = () => {
                             <div className="snap-label">ATTENDANCE ALERTS</div>
                             <div className="snap-value-row">
                                 <div className="snap-icon alert-icon"><Bell size={20} /></div>
-                                <span className="snap-value">{stats.alertsHigh + stats.alertsLow}</span>
+                                <span className="snap-value">{facultyDashboard.attendanceAlerts}</span>
                             </div>
                             <div className="snap-desc">Below 75% limit</div>
                         </div>
@@ -1828,14 +2083,15 @@ const MentorDashboard = () => {
                             <h2>My Classes</h2>
                             <p>Courses you are teaching this semester</p>
                         </div>
-                        <button className="mw-text-btn">View all schedule</button>
+                        <button className="mw-text-btn" onClick={() => navigate('/teacher/courses')}>View all schedule</button>
                     </div>
 
                     <div className="mw-filters">
                         {['All', 'Lectures', 'Laboratories', 'Pending grading'].map(filter => (
                             <button
                                 key={filter}
-                                className={`mw-filter-btn ${filter === 'All' ? 'active' : ''}`}
+                                onClick={() => setActiveFacultyClassFilter(filter)}
+                                className={`mw-filter-btn ${activeFacultyClassFilter === filter ? 'active' : ''}`}
                             >
                                 {filter}
                             </button>
@@ -1843,42 +2099,27 @@ const MentorDashboard = () => {
                     </div>
 
                     <div className="mw-mentee-list">
-                        {facultySections.length === 0 ? (
+                        {filteredFacultyClassItems.length === 0 ? (
                             <p style={{ fontSize: '0.8rem', color: '#64748b', textAlign: 'center', padding: '1rem' }}>No sections found.</p>
                         ) : (
-                            facultySections.slice(0, 4).map((section, index) => {
-                                const dept = section.course?.department || '';
-                                const code = section.course?.code || '';
-                                const name = section.course?.name || '';
-                                const sem = section.semester ? `Sem ${section.semester}` : '';
-
-                                // Mock dynamic pills based on index
-                                let badgeClass = "on-track";
-                                let badgeText = "On track";
-                                let statusText = "Class scheduled soon";
-
-                                if (index === 1) {
-                                    badgeClass = "high-priority";
-                                    badgeText = "Action required";
-                                    statusText = "Mid-terms grading in progress";
-                                } else if (index === 2) {
-                                    badgeClass = "met-recently border-only";
-                                    badgeText = "Lab pending";
-                                    statusText = "Next class tomorrow";
-                                }
-
+                            filteredFacultyClassItems.slice(0, 6).map((section, index) => {
                                 return (
-                                    <div className="mw-mentee-item" key={section.id || index}>
+                                    <div
+                                        className="mw-mentee-item"
+                                        key={section.id || index}
+                                        onClick={() => navigate(`/teacher/courses/${section.id}/manage`)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
                                         <div className="mentee-info">
                                             <div className={`mentee-avatar ${getBgClass(index)}`}>
-                                                {code.slice(0, 2)}
+                                                {(section.code || 'CS').slice(0, 2)}
                                             </div>
                                             <div className="mentee-details">
-                                                <h4>{code} · {name}</h4>
-                                                <p>{sem} {dept} · {statusText}</p>
+                                                <h4>{section.code} - {section.name}</h4>
+                                                <p>{section.semester}{section.department ? ` - ${section.department}` : ''} - {section.statusText}</p>
                                             </div>
                                         </div>
-                                        <div className={`mw-badge-pill ${badgeClass}`}>{badgeText}</div>
+                                        <div className={`mw-badge-pill ${section.badgeClass}`}>{section.badgeText}</div>
                                     </div>
                                 )
                             })
@@ -1900,17 +2141,23 @@ const MentorDashboard = () => {
                         </div>
                         <div className="mw-summary-item dashed-box">
                             <div className="sum-label">Average Attendance</div>
-                            <div className="sum-value">82%</div>
-                            <div className="sum-desc">Needs improvement</div>
+                            <div className="sum-value">{facultyDashboard.averageAttendance !== null ? `${facultyDashboard.averageAttendance}%` : 'N/A'}</div>
+                            <div className="sum-desc">
+                                {facultyDashboard.averageAttendance === null
+                                    ? 'No attendance records yet'
+                                    : facultyDashboard.averageAttendance < 75
+                                        ? 'Below target'
+                                        : 'Across recorded sessions'}
+                            </div>
                         </div>
                         <div className="mw-summary-item dashed-box">
                             <div className="sum-label">Assignments Published</div>
-                            <div className="sum-value">{facultySections.length * 3}</div>
-                            <div className="sum-desc">4 currently active</div>
+                            <div className="sum-value">{facultyDashboard.assignmentsPublished}</div>
+                            <div className="sum-desc">Across your active sections</div>
                         </div>
                         <div className="mw-summary-item dashed-box">
                             <div className="sum-label">Pending Approvals</div>
-                            <div className="sum-value">2</div>
+                            <div className="sum-value">{facultyDashboard.pendingApprovals}</div>
                             <div className="sum-desc">Student leave requests</div>
                         </div>
                     </div>
@@ -1932,43 +2179,43 @@ const MentorDashboard = () => {
                     <div className="mw-kanban">
                         <div className="kanban-col">
                             <div className="kanban-header">Upcoming</div>
-                            {getColTasks('Upcoming').length === 0 ? (
+                            {facultyTaskColumns.Upcoming.length === 0 ? (
                                 <div className="kanban-card">
                                     <h4>No scheduled</h4>
                                     <p>events found.</p>
                                 </div>
-                            ) : getColTasks('Upcoming').slice(0, 2).map((t, i) => (
-                                <div className="kanban-card" key={i}>
+                            ) : facultyTaskColumns.Upcoming.slice(0, 2).map((t) => (
+                                <div className="kanban-card" key={t.id}>
                                     <h4>{t.title}</h4>
-                                    <p>{t.description ? (t.description.length > 20 ? t.description.substring(0, 20) + '...' : t.description) : 'No description'}</p>
+                                    <p>{t.description ? (t.description.length > 40 ? t.description.substring(0, 40) + '...' : t.description) : 'No description'}</p>
                                 </div>
                             ))}
                         </div>
                         <div className="kanban-col">
                             <div className="kanban-header">This Week</div>
-                            {getColTasks('This Week').length === 0 ? (
+                            {facultyTaskColumns['This Week'].length === 0 ? (
                                 <div className="kanban-card">
                                     <h4>No tasks</h4>
                                     <p>found.</p>
                                 </div>
-                            ) : getColTasks('This Week').slice(0, 2).map((t, i) => (
-                                <div className="kanban-card highlight" key={i}>
+                            ) : facultyTaskColumns['This Week'].slice(0, 2).map((t) => (
+                                <div className="kanban-card highlight" key={t.id}>
                                     <h4>{t.title}</h4>
-                                    <p>{t.description ? (t.description.length > 20 ? t.description.substring(0, 20) + '...' : t.description) : 'No description'}</p>
+                                    <p>{t.description ? (t.description.length > 40 ? t.description.substring(0, 40) + '...' : t.description) : 'No description'}</p>
                                 </div>
                             ))}
                         </div>
                         <div className="kanban-col">
                             <div className="kanban-header">Later</div>
-                            {getColTasks('Later').length === 0 ? (
+                            {facultyTaskColumns.Later.length === 0 ? (
                                 <div className="kanban-card">
                                     <h4>No tasks</h4>
                                     <p>found.</p>
                                 </div>
-                            ) : getColTasks('Later').slice(0, 2).map((t, i) => (
-                                <div className="kanban-card" key={i}>
+                            ) : facultyTaskColumns.Later.slice(0, 2).map((t) => (
+                                <div className="kanban-card" key={t.id}>
                                     <h4>{t.title}</h4>
-                                    <p>{t.description ? (t.description.length > 20 ? t.description.substring(0, 20) + '...' : t.description) : 'No description'}</p>
+                                    <p>{t.description ? (t.description.length > 40 ? t.description.substring(0, 40) + '...' : t.description) : 'No description'}</p>
                                 </div>
                             ))}
                         </div>
@@ -1983,7 +2230,25 @@ const MentorDashboard = () => {
                     </div>
 
                     <div className="mw-timeline">
-                        <div className="timeline-item">
+                        {facultyDashboard.recentActivity.length === 0 ? (
+                            <div className="timeline-item">
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <h4>No recent activity</h4>
+                                    <p>Course updates from the database will appear here.</p>
+                                </div>
+                            </div>
+                        ) : facultyDashboard.recentActivity.map((item) => (
+                            <div className="timeline-item" key={item.id}>
+                                <div className="timeline-dot"></div>
+                                <div className="timeline-content">
+                                    <h4>{item.title}</h4>
+                                    <p>{getRelativeDateLabel(item.occurredAt)} - {item.description}</p>
+                                </div>
+                            </div>
+                        ))}
+                        
+                        <div className="timeline-item" style={{ display: 'none' }}>
                             <div className="timeline-dot"></div>
                             <div className="timeline-content">
                                 <h4>Published Assignment 3 for CSE301</h4>
@@ -1991,7 +2256,7 @@ const MentorDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="timeline-item">
+                        <div className="timeline-item" style={{ display: 'none' }}>
                             <div className="timeline-dot"></div>
                             <div className="timeline-content">
                                 <h4>Recorded attendance for IT201</h4>
@@ -1999,7 +2264,7 @@ const MentorDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="timeline-item">
+                        <div className="timeline-item" style={{ display: 'none' }}>
                             <div className="timeline-dot"></div>
                             <div className="timeline-content">
                                 <h4>Uploaded lecture notes</h4>
@@ -2007,13 +2272,14 @@ const MentorDashboard = () => {
                             </div>
                         </div>
 
-                        <div className="timeline-item">
+                        <div className="timeline-item" style={{ display: 'none' }}>
                             <div className="timeline-dot"></div>
                             <div className="timeline-content">
                                 <h4>Approved leave request for John D</h4>
                                 <p>4 days ago · Medical leave</p>
                             </div>
                         </div>
+                        
                     </div>
                 </div>
             </div>
