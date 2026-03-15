@@ -14,7 +14,8 @@ import {
     TrendingUp,
     TrendingDown,
     Search,
-    Filter
+    Filter,
+    Loader2
 } from 'lucide-react';
 import {
     BarChart,
@@ -43,28 +44,64 @@ const HODStudentAttendance = () => {
 
     const [trendData, setTrendData] = useState([]);
     const [attendanceRecords, setAttendanceRecords] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const fetchAttendanceData = async () => {
             if (!currentUser) return;
+            setLoading(true);
+            setError(null);
             try {
                 let dept = userData?.department;
                 if (!dept) {
                     const hodRes = await api.get(`/department/by-hod/${currentUser.uid}`);
                     dept = hodRes.data.department;
                 }
-                if (!dept) return;
+                if (!dept) {
+                    setLoading(false);
+                    return;
+                }
                 const res = await api.get(`/department/student-attendance/${dept}`);
                 const data = res.data;
-                setStats(data.stats);
-                setTrendData(data.trendData);
-                setAttendanceRecords(data.attendanceRecords);
+                setStats(data.stats || {
+                    avgAttendance: 0, avgAttendanceDelta: 0,
+                    perfectAttendance: 0, belowThreshold: 0, belowThresholdDelta: 0,
+                    unexcusedAbsences: 0, unexcusedAbsencesDelta: 0
+                });
+                setTrendData(data.trendData || []);
+                setAttendanceRecords(data.attendanceRecords || []);
             } catch (err) {
                 console.error("Failed to fetch attendance data", err);
+                const errorData = err?.response?.data;
+                const errorMessage = typeof errorData === 'object' ? (errorData.message || errorData.error || JSON.stringify(errorData)) : errorData;
+                setError(errorMessage || err.message || 'Failed to load data');
+            } finally {
+                setLoading(false);
             }
         };
         fetchAttendanceData();
     }, [currentUser, userData]);
+
+    if (loading) {
+        return (
+            <div className="attendance-tracking-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '12px' }}>
+                <Loader2 size={24} className="spin" />
+                <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>Loading student attendance data...</span>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="attendance-tracking-container">
+                <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '12px', padding: '24px', color: '#EF4444', fontSize: '14px' }}>
+                    <strong>Failed to load data:</strong> {error}
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="attendance-tracking-container">
@@ -137,6 +174,11 @@ const HODStudentAttendance = () => {
                     </div>
                     <div className="kpi-subtitle">
                         Students with 100% attendance
+                        {attendanceRecords.length > 0 && (
+                            <span style={{ marginLeft: '6px', color: '#2563EB', fontWeight: 600 }}>
+                                ({((stats.perfectAttendance / attendanceRecords.length) * 100).toFixed(1)}%)
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -167,6 +209,9 @@ const HODStudentAttendance = () => {
                     <div className={`kpi-trend ${stats.unexcusedAbsencesDelta <= 0 ? 'positive' : 'negative'}`}>
                         {stats.unexcusedAbsencesDelta <= 0 ? <TrendingDown size={12} /> : <TrendingUp size={12} />}
                         {stats.unexcusedAbsencesDelta > 0 ? '+' : ''}{stats.unexcusedAbsencesDelta}% from last month
+                    </div>
+                    <div className="kpi-subtitle" style={{ marginTop: '4px' }}>
+                        Across {attendanceRecords.length} enrolled students
                     </div>
                 </div>
             </div>
@@ -199,11 +244,21 @@ const HODStudentAttendance = () => {
             {/* Table Section */}
             <div className="table-section-card">
                 <div className="section-header table-header-flex">
-                    <h2>Student Attendance Records</h2>
+                    <h2>
+                        Student Attendance Records
+                        <span style={{ fontSize: '13px', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '8px' }}>
+                            {attendanceRecords.length} students
+                        </span>
+                    </h2>
                     <div className="table-actions">
                         <div className="search-box">
                             <Search size={16} className="search-icon" />
-                            <input type="text" placeholder="Search student ID or name..." />
+                            <input
+                                type="text"
+                                placeholder="Search student ID or name..."
+                                value={searchQuery}
+                                onChange={e => setSearchQuery(e.target.value)}
+                            />
                         </div>
                         <button className="icon-filter-btn">
                             <Filter size={16} />
@@ -217,7 +272,7 @@ const HODStudentAttendance = () => {
                             <tr>
                                 <th>Student</th>
                                 <th>ID Number</th>
-                                <th>Program & Year</th>
+                                <th>Program &amp; Year</th>
                                 <th>Classes Attended</th>
                                 <th>Attendance %</th>
                                 <th style={{ textAlign: 'right' }}>Status</th>
@@ -231,12 +286,18 @@ const HODStudentAttendance = () => {
                                     </td>
                                 </tr>
                             ) : (
-                                attendanceRecords.map((record, idx) => (
+                                attendanceRecords
+                                    .filter(r =>
+                                        !searchQuery ||
+                                        r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                        r.id?.toLowerCase().includes(searchQuery.toLowerCase())
+                                    )
+                                    .map((record, idx) => (
                                     <tr key={idx}>
                                         <td>
                                             <div className="student-cell">
                                                 <div className="student-avatar">
-                                                    {record.name.charAt(0)}
+                                                    {record.name?.charAt(0) || '?'}
                                                 </div>
                                                 <div className="student-info">
                                                     <span className="student-name">{record.name}</span>
@@ -246,7 +307,14 @@ const HODStudentAttendance = () => {
                                         </td>
                                         <td><span className="mono-text">{record.id}</span></td>
                                         <td><span className="program-text">{record.program}</span></td>
-                                        <td><span className="classes-text">{record.classesAttended} / {record.totalClasses}</span></td>
+                                        <td>
+                                            <span className="classes-text">
+                                                {record.classesAttended} / {record.totalClasses}
+                                                {record.totalClasses === 90 && (
+                                                    <span title="Estimated from stored attendance %" style={{ color: 'var(--text-muted)', fontSize: '11px', marginLeft: '4px' }}>~est</span>
+                                                )}
+                                            </span>
+                                        </td>
                                         <td>
                                             <span className={`att-percent ${record.statusClass}`}>
                                                 {record.attendancePercent}%
@@ -263,7 +331,16 @@ const HODStudentAttendance = () => {
                         </tbody>
                     </table>
                 </div>
+                {attendanceRecords.length > 0 && (
+                    <div style={{ padding: '12px 0 0', display: 'flex', gap: '20px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--glass-border)', marginTop: '8px' }}>
+                        <span>✅ Good ≥85%: <strong style={{ color: '#10B981' }}>{attendanceRecords.filter(r => r.attendancePercent >= 85).length}</strong></span>
+                        <span>⚠️ Warning 75–84%: <strong style={{ color: '#F59E0B' }}>{attendanceRecords.filter(r => r.attendancePercent >= 75 && r.attendancePercent < 85).length}</strong></span>
+                        <span>🚨 Critical &lt;75%: <strong style={{ color: '#EF4444' }}>{attendanceRecords.filter(r => r.attendancePercent > 0 && r.attendancePercent < 75).length}</strong></span>
+                        <span>❓ No Data: <strong>{attendanceRecords.filter(r => r.attendancePercent === 0).length}</strong></span>
+                    </div>
+                )}
             </div>
+
         </div>
     );
 };

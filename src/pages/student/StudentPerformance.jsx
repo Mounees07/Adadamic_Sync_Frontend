@@ -285,7 +285,7 @@ const StudentPerformance = () => {
                 <div className="perf-stat-box">
                     <div className="perf-stat-label">Excellent</div>
                     <div className="perf-stat-value" style={{ color: '#10b981' }}>{excellentCount}</div>
-                    <div className="perf-stat-sub">>= 75%</div>
+                    <div className="perf-stat-sub">{'>='} 75%</div>
                 </div>
                 <div className="perf-stat-box">
                     <div className="perf-stat-label">Needs Focus</div>

@@ -273,10 +273,19 @@
     border-radius: 4px;
 }
 
+.bar-fill.bar-emerald { background: #10B981; }
+.bar-fill.bar-blue    { background: #2563EB; }
+.bar-fill.bar-cyan    { background: #06B6D4; }
+.bar-fill.bar-yellow  { background: #EAB308; }
+.bar-fill.bar-orange  { background: #F59E0B; }
+.bar-fill.bar-red     { background: #EF4444; }
+
+/* Legacy bg- aliases kept for any other component that uses them */
 .bg-emerald { background: #10B981; }
-.bg-blue { background: #2563EB; }
-.bg-orange { background: #F59E0B; }
-.bg-red { background: #EF4444; }
+.bg-blue    { background: #2563EB; }
+.bg-orange  { background: #F59E0B; }
+.bg-red     { background: #EF4444; }
+
 
 .gpa-percent {
     width: 32px;
@@ -403,3 +412,35 @@
     .kpi-cards-grid { grid-template-columns: 1fr; }
     .performance-header { flex-direction: column; align-items: flex-start; gap: 16px; }
 }
+
+/* GPA highlight in Dean's list table */
+.gpa-highlight {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+/* Pass rate warning */
+.pr-val.pr-warn {
+    color: #F59E0B;
+}
+
+/* Spinner animation for loading state */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+.gpa-percent {
+    min-width: 70px;
+}
+
+.text-center { text-align: center; }
+.text-muted  { color: var(--text-muted); }

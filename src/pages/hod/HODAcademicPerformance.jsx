@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import api from '../../utils/api';
 import {
     ChevronRight,
     Calendar,
@@ -11,15 +12,15 @@ import {
     AlertTriangle,
     Award,
     TrendingUp,
-    TrendingDown
+    TrendingDown,
+    Loader2
 } from 'lucide-react';
 import './HODAcademicPerformance.css';
 
 const HODAcademicPerformance = () => {
     const navigate = useNavigate();
-    const { userData } = useAuth();
-    
-    // Replacing system generated data with default empty/0 states
+    const { currentUser, userData } = useAuth();
+
     const [stats, setStats] = useState({
         avgGpa: 0,
         avgGpaDelta: 0,
@@ -38,12 +39,79 @@ const HODAcademicPerformance = () => {
     const [passRates, setPassRates] = useState([]);
     const [probationStudents, setProbationStudents] = useState([]);
     const [deansListStudents, setDeansListStudents] = useState([]);
+    const [highestCohort, setHighestCohort] = useState('N/A');
+    const [lowestCohort, setLowestCohort] = useState('N/A');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    // Optional: hook for future API integration
     useEffect(() => {
-        // Data would be fetched here
-        // API endpoint placeholder: `/department/academic-performance/${userData.department}`
-    }, [userData]);
+        const fetchData = async () => {
+            if (!currentUser) return;
+            setLoading(true);
+            setError(null);
+            try {
+                let dept = userData?.department;
+                if (!dept) {
+                    const hodRes = await api.get(`/department/by-hod/${currentUser.uid}`);
+                    dept = hodRes.data.department;
+                }
+                if (!dept) {
+                    setLoading(false);
+                    return;
+                }
+                const res = await api.get(`/department/academic-performance/${encodeURIComponent(dept)}`);
+                const data = res.data;
+
+                setStats(data.stats || {
+                    avgGpa: 0, avgGpaDelta: 0, passRate: 0, passRateDelta: 0,
+                    probationCount: 0, probationDelta: 0, deansListCount: 0,
+                    deansListDelta: 0, totalEnrolled: 0, medianGpa: 0, probationRate: 0
+                });
+                setGpaDistribution(data.gpaDistribution || []);
+                setPassRates(data.passRates || []);
+                setProbationStudents(data.probationStudents || []);
+                setDeansListStudents(data.deansListStudents || []);
+                setHighestCohort(data.highestCohort || 'N/A');
+                setLowestCohort(data.lowestCohort || 'N/A');
+            } catch (err) {
+                console.error('Failed to load academic performance data', err);
+                const errorData = err?.response?.data;
+                const msg = typeof errorData === 'object'
+                    ? (errorData.message || errorData.error || JSON.stringify(errorData))
+                    : errorData;
+                setError(msg || err.message || 'Failed to load data');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+    }, [currentUser, userData]);
+
+    if (loading) {
+        return (
+            <div className="academic-performance-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '12px' }}>
+                <Loader2 size={24} className="spin" />
+                <span style={{ fontSize: '15px', color: 'var(--text-muted)' }}>Loading academic performance data...</span>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="academic-performance-container">
+                <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '12px', padding: '24px', color: '#EF4444', fontSize: '14px' }}>
+                    <strong>Failed to load data:</strong> {error}
+                </div>
+            </div>
+        );
+    }
+
+    // Compute insight strings from real data
+    const aboveAvgPct = gpaDistribution
+        .filter(g => ['O (9-10)', 'A+ (8-9)', 'A (7-8)'].includes(g.label))
+        .reduce((sum, g) => sum + g.percent, 0)
+        .toFixed(1);
+    const belowPassPct = gpaDistribution.find(g => g.label === '< 5')?.percent ?? 0;
 
     return (
         <div className="academic-performance-container">
@@ -62,7 +130,7 @@ const HODAcademicPerformance = () => {
                 </div>
                 <div className="header-actions">
                     <button className="btn-secondary">
-                        <Calendar size={16} /> Fall Semester 2024
+                        <Calendar size={16} /> Current Semester
                     </button>
                     <button className="btn-secondary">
                         <Printer size={16} /> Print
@@ -87,7 +155,7 @@ const HODAcademicPerformance = () => {
                             {stats.avgGpaDelta >= 0 ? '+' : ''}{stats.avgGpaDelta}
                         </div>
                     </div>
-                    <div className="kpi-subtitle">vs last semester</div>
+                    <div className="kpi-subtitle">Median GPA: {stats.medianGpa.toFixed(2)} | {stats.totalEnrolled} enrolled</div>
                 </div>
 
                 <div className="kpi-card">
@@ -102,7 +170,7 @@ const HODAcademicPerformance = () => {
                             {stats.passRateDelta >= 0 ? '+' : ''}{stats.passRateDelta}%
                         </div>
                     </div>
-                    <div className="kpi-subtitle">vs last semester</div>
+                    <div className="kpi-subtitle">Students with GPA {'>='} 5.0</div>
                 </div>
 
                 <div className="kpi-card">
@@ -117,7 +185,9 @@ const HODAcademicPerformance = () => {
                             {stats.probationDelta > 0 ? '+' : ''}{stats.probationDelta}
                         </div>
                     </div>
-                    <div className="kpi-subtitle">Out of {stats.totalEnrolled} enrolled students</div>
+                    <div className="kpi-subtitle">
+                        {stats.probationRate}% of {stats.totalEnrolled} enrolled students
+                    </div>
                 </div>
 
                 <div className="kpi-card">
@@ -132,7 +202,7 @@ const HODAcademicPerformance = () => {
                             {stats.deansListDelta >= 0 ? '+' : ''}{stats.deansListDelta}
                         </div>
                     </div>
-                    <div className="kpi-subtitle">Students achieving &gt; 3.8 GPA</div>
+                    <div className="kpi-subtitle">Students achieving GPA &gt;= 8.5</div>
                 </div>
             </div>
 
@@ -142,12 +212,12 @@ const HODAcademicPerformance = () => {
                 <div className="section-card">
                     <div className="section-header">
                         <div>
-                            <h2>GPA Distribution & Cohort Insight</h2>
-                            <p>How the 3.24 average GPA breaks down across the department.</p>
+                            <h2>GPA Distribution &amp; Cohort Insight</h2>
+                            <p>How the {stats.avgGpa.toFixed(2)} average GPA breaks down across the department.</p>
                         </div>
-                        <span className="gray-badge">Median GPA 3.18</span>
+                        <span className="gray-badge">Median GPA {stats.medianGpa.toFixed(2)}</span>
                     </div>
-                    
+
                     <div className="gpa-bars">
                         {gpaDistribution.length === 0 ? (
                             <div className="text-muted" style={{ padding: '20px 0', fontSize: '13px' }}>No GPA distribution data available</div>
@@ -158,20 +228,24 @@ const HODAcademicPerformance = () => {
                                     <div className="bar-bg">
                                         <div className={`bar-fill ${group.colorClass}`} style={{ width: `${group.percent}%` }}></div>
                                     </div>
-                                    <span className="gpa-percent">{group.percent}%</span>
+                                    <span className="gpa-percent">{group.percent}% <span style={{ color: 'var(--text-muted)', fontSize: '11px' }}>({group.count})</span></span>
                                 </div>
                             ))
                         )}
                     </div>
 
                     <div className="cohort-badges">
-                        <span className="cohort-badge">Highest cohort GPA <strong>Year 4 - 3.46</strong></span>
-                        <span className="cohort-badge">Lowest cohort GPA <strong>Year 1 - 3.02</strong></span>
+                        <span className="cohort-badge">Highest cohort GPA <strong>{highestCohort}</strong></span>
+                        <span className="cohort-badge">Lowest cohort GPA <strong>{lowestCohort}</strong></span>
                     </div>
 
                     <div className="insights-list border-info">
-                        <p><span className="dot blue"></span> Upper GPA bands (above 3.3) account for 73% of students, showing strong overall performance.</p>
-                        <p><span className="dot orange"></span> Only 8% of students fall below 2.7 GPA and should be monitored closely.</p>
+                        <p><span className="dot blue"></span>
+                            {aboveAvgPct}% of students are in the upper GPA bands (A and above).
+                        </p>
+                        <p><span className="dot orange"></span>
+                            {belowPassPct}% of students fall below passing GPA ({stats.probationCount} on probation) and should be monitored closely.
+                        </p>
                     </div>
                 </div>
 
@@ -180,27 +254,34 @@ const HODAcademicPerformance = () => {
                     <div className="section-header">
                         <div>
                             <h2>Pass Rate by Semester</h2>
-                            <p>Trend of the 88.5% pass rate across recent semesters.</p>
+                            <p>Current overall pass rate is {stats.passRate}% across the department.</p>
                         </div>
                         <span className="gray-badge">Target &ge; 90%</span>
                     </div>
 
                     <div className="pass-rate-stats">
                         {passRates.length === 0 ? (
-                            <div className="text-muted" style={{ fontSize: '13px' }}>No historical pass rate data available</div>
+                            <div className="text-muted" style={{ fontSize: '13px' }}>No pass rate data available by semester</div>
                         ) : (
                             passRates.map((pr, idx) => (
                                 <div className="pr-col" key={idx}>
                                     <span className="pr-label">{pr.semester}</span>
-                                    <span className="pr-val">{pr.rate}%</span>
+                                    <span className={`pr-val ${pr.rate < 90 ? 'pr-warn' : ''}`}>{pr.rate}%</span>
+                                    <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{pr.total} students</span>
                                 </div>
                             ))
                         )}
                     </div>
 
                     <div className="insights-list border-warning mt-auto">
-                        <p><span className="dot orange"></span> Pass rate has declined 2.5 percentage points from Fall 2023 and is slightly below the 90% departmental goal.</p>
-                        <p><span className="dot blue"></span> Consider reviewing gateway courses with high enrollment to recover overall pass rate.</p>
+                        <p><span className="dot orange"></span>
+                            {passRates.filter(p => p.rate < 90).length > 0
+                                ? `${passRates.filter(p => p.rate < 90).length} semester(s) are below the 90% departmental pass rate target.`
+                                : 'All semesters are meeting the 90% target — excellent department performance.'}
+                        </p>
+                        <p><span className="dot blue"></span>
+                            Review courses in lower-performing semesters to identify and address root causes.
+                        </p>
                     </div>
                 </div>
             </div>
@@ -212,11 +293,11 @@ const HODAcademicPerformance = () => {
                     <div className="section-header">
                         <div>
                             <h2>Students on Academic Probation</h2>
-                            <p>Breakdown of the 42 students currently flagged.</p>
+                            <p>Breakdown of the {stats.probationCount} students currently flagged.</p>
                         </div>
-                        <span className="red-badge">Probation Rate 3.4%</span>
+                        <span className="red-badge">Probation Rate {stats.probationRate}%</span>
                     </div>
-                    
+
                     <div className="table-container">
                         <table className="perf-table">
                             <thead>
@@ -224,23 +305,23 @@ const HODAcademicPerformance = () => {
                                     <th>Cohort</th>
                                     <th>Students</th>
                                     <th>Primary Reason</th>
-                                    <th>Top Courses Impacting</th>
+                                    <th>Level</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {probationStudents.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="text-center text-muted" style={{ padding: '24px' }}>
-                                            No probation student data available
+                                            {stats.totalEnrolled === 0 ? 'No student data found for this department' : 'No students on academic probation — great performance!'}
                                         </td>
                                     </tr>
                                 ) : (
                                     probationStudents.map((st, idx) => (
                                         <tr key={idx}>
-                                            <td>{st.cohort}<br/><span className="sub-text">({st.level})</span></td>
-                                            <td>{st.count}</td>
+                                            <td>{st.cohort}</td>
+                                            <td><strong>{st.count}</strong></td>
                                             <td>{st.reason}</td>
-                                            <td>{st.courses}</td>
+                                            <td><span className="sub-text">{st.level}</span></td>
                                         </tr>
                                     ))
                                 )}
@@ -253,17 +334,17 @@ const HODAcademicPerformance = () => {
                 <div className="section-card">
                     <div className="section-header">
                         <div>
-                            <h2>Dean's List & High Performers</h2>
-                            <p>Who contributes to the 215 Dean's List eligible students.</p>
+                            <h2>Dean's List &amp; High Performers</h2>
+                            <p>{stats.deansListCount} students eligible across the department.</p>
                         </div>
-                        <span className="green-badge">Top 10% GPA &gt; 3.8</span>
+                        <span className="green-badge">GPA &ge; 8.5</span>
                     </div>
 
                     <div className="table-container">
                         <table className="perf-table">
                             <thead>
                                 <tr>
-                                    <th>Cohort / Program</th>
+                                    <th>Cohort / Year</th>
                                     <th>Students</th>
                                     <th>Avg GPA</th>
                                     <th>Notable Courses</th>
@@ -273,15 +354,15 @@ const HODAcademicPerformance = () => {
                                 {deansListStudents.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="text-center text-muted" style={{ padding: '24px' }}>
-                                            No Dean's List data available
+                                            {stats.totalEnrolled === 0 ? 'No student data found for this department' : 'No students currently meeting Dean\'s List criteria (GPA ≥ 8.5)'}
                                         </td>
                                     </tr>
                                 ) : (
                                     deansListStudents.map((dl, idx) => (
                                         <tr key={idx}>
                                             <td>{dl.program}</td>
-                                            <td>{dl.count}</td>
-                                            <td>{dl.avgGpa}</td>
+                                            <td><strong>{dl.count}</strong></td>
+                                            <td><span className="gpa-highlight">{dl.avgGpa}</span></td>
                                             <td>{dl.courses}</td>
                                         </tr>
                                     ))
@@ -291,8 +372,14 @@ const HODAcademicPerformance = () => {
                     </div>
 
                     <div className="insights-list mt-auto">
-                        <p><span className="dot emerald"></span> High performers are concentrated in the Year 4 honors and Year 3 AI/Data tracks.</p>
-                        <p><span className="dot blue"></span> Courses like CS 420 and CS 320 correlate strongly with Dean's List eligibility.</p>
+                        <p><span className="dot emerald"></span>
+                            {deansListStudents.length > 0
+                                ? `Dean's List students are distributed across ${deansListStudents.length} year group(s).`
+                                : 'Encourage students to aim for GPA ≥ 8.5 to qualify for the Dean\'s List.'}
+                        </p>
+                        <p><span className="dot blue"></span>
+                            A total of {stats.deansListCount} out of {stats.totalEnrolled} students ({stats.totalEnrolled > 0 ? ((stats.deansListCount / stats.totalEnrolled) * 100).toFixed(1) : 0}%) are high performers.
+                        </p>
                     </div>
                 </div>
             </div>
