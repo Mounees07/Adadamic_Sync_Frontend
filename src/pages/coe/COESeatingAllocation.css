@@ -1,7 +1,7 @@
 /* COESeatingAllocation.css */
 .coe-seating-container {
     padding: 2rem;
-    max-width: 1400px;
+    max-width: 100%;
     margin: 0 auto;
     animation: fadeIn 0.5s ease-out;
 }

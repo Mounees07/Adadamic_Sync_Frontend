@@ -2,7 +2,7 @@
 
 .teacher-manage-container {
     padding: 2rem;
-    max-width: 1400px;
+    max-width: 100%;
     margin: 0 auto;
     background: var(--bg-deep);
     min-height: 100vh;
@@ -603,7 +603,7 @@
 }
 
 .grading-modal-content {
-    max-width: 1180px;
+    max-width: 100%;
     width: min(1180px, 100%);
     max-height: min(90vh, 920px);
     overflow: hidden;

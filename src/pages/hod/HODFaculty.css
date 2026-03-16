@@ -485,7 +485,7 @@
 /* ============================================================
    RESPONSIVE — LAPTOP (769px – 1200px)
    ============================================================ */
-@media (max-width: 1200px) {
+@media (max-width: 100%) {
     .hod-faculty-container-new {
         padding: 20px 24px;
     }

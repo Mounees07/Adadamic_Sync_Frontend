@@ -1,6 +1,6 @@
 /* StudentFeeHistory.css */
 .fee-history-page {
-    max-width: 1200px;
+    max-width: 100%;
     margin: 0 auto;
     padding: 32px 40px 48px;
     color: var(--text-primary, #0f172a);

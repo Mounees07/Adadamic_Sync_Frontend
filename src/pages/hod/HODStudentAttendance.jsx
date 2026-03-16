@@ -7,6 +7,7 @@ import {
     Printer,
     Download,
     ChevronDown,
+    ChevronRight,
     CheckCircle,
     Award,
     AlertTriangle,
@@ -15,7 +16,9 @@ import {
     TrendingDown,
     Search,
     Filter,
-    Loader2
+    Loader2,
+    Fingerprint,
+    BookOpen
 } from 'lucide-react';
 import {
     BarChart,
@@ -31,7 +34,6 @@ const HODStudentAttendance = () => {
     const navigate = useNavigate();
     const { currentUser, userData } = useAuth();
 
-    // States for data (initialized empty/0 to avoid mock system data)
     const [stats, setStats] = useState({
         avgAttendance: 0,
         avgAttendanceDelta: 0,
@@ -47,6 +49,8 @@ const HODStudentAttendance = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [expandedRows, setExpandedRows] = useState({});
+    const [viewMode, setViewMode] = useState('course'); // 'course' | 'biometric'
 
     useEffect(() => {
         const fetchAttendanceData = async () => {
@@ -75,7 +79,9 @@ const HODStudentAttendance = () => {
             } catch (err) {
                 console.error("Failed to fetch attendance data", err);
                 const errorData = err?.response?.data;
-                const errorMessage = typeof errorData === 'object' ? (errorData.message || errorData.error || JSON.stringify(errorData)) : errorData;
+                const errorMessage = typeof errorData === 'object'
+                    ? (errorData.message || errorData.error || JSON.stringify(errorData))
+                    : errorData;
                 setError(errorMessage || err.message || 'Failed to load data');
             } finally {
                 setLoading(false);
@@ -83,6 +89,16 @@ const HODStudentAttendance = () => {
         };
         fetchAttendanceData();
     }, [currentUser, userData]);
+
+    const toggleRow = (idx) => {
+        setExpandedRows(prev => ({ ...prev, [idx]: !prev[idx] }));
+    };
+
+    const filteredRecords = attendanceRecords.filter(r =>
+        !searchQuery ||
+        r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.id?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
 
     if (loading) {
         return (
@@ -113,7 +129,7 @@ const HODStudentAttendance = () => {
                     </button>
                     <div className="header-titles">
                         <h1>Student Attendance Tracking</h1>
-                        <p>Daily and monthly attendance records across the department.</p>
+                        <p>Course-wise &amp; biometric daily attendance records across the department.</p>
                     </div>
                 </div>
                 <div className="header-actions">
@@ -148,7 +164,6 @@ const HODStudentAttendance = () => {
 
             {/* KPI Cards */}
             <div className="kpi-cards-grid-att">
-                {/* Avg Attendance */}
                 <div className="kpi-card-att">
                     <div className="kpi-card-header">
                         <span className="kpi-title">Avg. Attendance Rate</span>
@@ -163,7 +178,6 @@ const HODStudentAttendance = () => {
                     </div>
                 </div>
 
-                {/* Perfect Attendance */}
                 <div className="kpi-card-att">
                     <div className="kpi-card-header">
                         <span className="kpi-title">Perfect Attendance</span>
@@ -182,7 +196,6 @@ const HODStudentAttendance = () => {
                     </div>
                 </div>
 
-                {/* Below Threshold */}
                 <div className="kpi-card-att">
                     <div className="kpi-card-header">
                         <span className="kpi-title">Below 75% Threshold</span>
@@ -197,7 +210,6 @@ const HODStudentAttendance = () => {
                     </div>
                 </div>
 
-                {/* Unexcused Absences */}
                 <div className="kpi-card-att">
                     <div className="kpi-card-header">
                         <span className="kpi-title">Unexcused Absences</span>
@@ -251,6 +263,23 @@ const HODStudentAttendance = () => {
                         </span>
                     </h2>
                     <div className="table-actions">
+                        {/* View Mode Toggle */}
+                        <div className="view-mode-toggle">
+                            <button
+                                className={`toggle-btn ${viewMode === 'course' ? 'active' : ''}`}
+                                onClick={() => setViewMode('course')}
+                                title="Course-wise attendance"
+                            >
+                                <BookOpen size={14} /> Course
+                            </button>
+                            <button
+                                className={`toggle-btn ${viewMode === 'biometric' ? 'active' : ''}`}
+                                onClick={() => setViewMode('biometric')}
+                                title="Biometric / daily check-in attendance"
+                            >
+                                <Fingerprint size={14} /> Biometric
+                            </button>
+                        </div>
                         <div className="search-box">
                             <Search size={16} className="search-icon" />
                             <input
@@ -266,81 +295,232 @@ const HODStudentAttendance = () => {
                     </div>
                 </div>
 
-                <div className="table-responsive">
-                    <table className="attendance-table">
-                        <thead>
-                            <tr>
-                                <th>Student</th>
-                                <th>ID Number</th>
-                                <th>Program &amp; Year</th>
-                                <th>Classes Attended</th>
-                                <th>Attendance %</th>
-                                <th style={{ textAlign: 'right' }}>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {attendanceRecords.length === 0 ? (
+                {/* --- COURSE-WISE TABLE --- */}
+                {viewMode === 'course' && (
+                    <div className="table-responsive">
+                        <table className="attendance-table">
+                            <thead>
                                 <tr>
-                                    <td colSpan="6" className="empty-state-message">
-                                        No attendance records available
-                                    </td>
+                                    <th style={{ width: '28px' }}></th>
+                                    <th>Student</th>
+                                    <th>ID Number</th>
+                                    <th>Program &amp; Year</th>
+                                    <th>Classes Attended</th>
+                                    <th>Attendance %</th>
+                                    <th style={{ textAlign: 'right' }}>Status</th>
                                 </tr>
-                            ) : (
-                                attendanceRecords
-                                    .filter(r =>
-                                        !searchQuery ||
-                                        r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                                        r.id?.toLowerCase().includes(searchQuery.toLowerCase())
-                                    )
-                                    .map((record, idx) => (
-                                    <tr key={idx}>
-                                        <td>
-                                            <div className="student-cell">
-                                                <div className="student-avatar">
-                                                    {record.name?.charAt(0) || '?'}
-                                                </div>
-                                                <div className="student-info">
-                                                    <span className="student-name">{record.name}</span>
-                                                    <span className="student-email">{record.email}</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td><span className="mono-text">{record.id}</span></td>
-                                        <td><span className="program-text">{record.program}</span></td>
-                                        <td>
-                                            <span className="classes-text">
-                                                {record.classesAttended} / {record.totalClasses}
-                                                {record.totalClasses === 90 && (
-                                                    <span title="Estimated from stored attendance %" style={{ color: 'var(--text-muted)', fontSize: '11px', marginLeft: '4px' }}>~est</span>
-                                                )}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span className={`att-percent ${record.statusClass}`}>
-                                                {record.attendancePercent}%
-                                            </span>
-                                        </td>
-                                        <td style={{ textAlign: 'right' }}>
-                                            <span className={`status-badge ${record.statusClass}`}>
-                                                {record.status}
-                                            </span>
+                            </thead>
+                            <tbody>
+                                {filteredRecords.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="7" className="empty-state-message">
+                                            No attendance records available
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                    </table>
-                </div>
+                                ) : (
+                                    filteredRecords.map((record, idx) => (
+                                        <React.Fragment key={idx}>
+                                            <tr
+                                                className={expandedRows[idx] ? 'row-expanded' : ''}
+                                                style={{ cursor: (record.courseBreakdown?.length > 0) ? 'pointer' : 'default' }}
+                                                onClick={() => record.courseBreakdown?.length > 0 && toggleRow(idx)}
+                                            >
+                                                <td style={{ padding: '0 4px', textAlign: 'center' }}>
+                                                    {record.courseBreakdown?.length > 0 && (
+                                                        <span className={`expand-icon ${expandedRows[idx] ? 'rotated' : ''}`}>
+                                                            <ChevronRight size={14} />
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td>
+                                                    <div className="student-cell">
+                                                        <div className="student-avatar">
+                                                            {record.name?.charAt(0) || '?'}
+                                                        </div>
+                                                        <div className="student-info">
+                                                            <span className="student-name">{record.name}</span>
+                                                            <span className="student-email">{record.email}</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><span className="mono-text">{record.id}</span></td>
+                                                <td><span className="program-text">{record.program}</span></td>
+                                                <td>
+                                                    <span className="classes-text">
+                                                        {record.totalClasses > 0
+                                                            ? `${record.classesAttended} / ${record.totalClasses}`
+                                                            : <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>No data</span>
+                                                        }
+                                                        {record.totalClasses === 90 && (
+                                                            <span title="Estimated from stored attendance %" style={{ color: 'var(--text-muted)', fontSize: '11px', marginLeft: '4px' }}>~est</span>
+                                                        )}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span className={`att-percent ${record.statusClass}`}>
+                                                        {record.attendancePercent > 0 ? `${record.attendancePercent}%` : '—'}
+                                                    </span>
+                                                </td>
+                                                <td style={{ textAlign: 'right' }}>
+                                                    <span className={`status-badge ${record.statusClass}`}>
+                                                        {record.status}
+                                                    </span>
+                                                </td>
+                                            </tr>
+
+                                            {/* Expandable course breakdown */}
+                                            {expandedRows[idx] && record.courseBreakdown?.length > 0 && (
+                                                <tr className="course-breakdown-row">
+                                                    <td colSpan="7" style={{ padding: '0 0 8px 52px', background: 'var(--bg-subtle)' }}>
+                                                        <div className="course-breakdown-container">
+                                                            <div className="course-breakdown-title">
+                                                                <BookOpen size={13} /> Course-wise Breakdown
+                                                            </div>
+                                                            <div className="course-breakdown-grid">
+                                                                {record.courseBreakdown.map((cb, ci) => (
+                                                                    <div key={ci} className="course-breakdown-item">
+                                                                        <div className="cb-course-name">{cb.course}</div>
+                                                                        <div className="cb-stats">
+                                                                            <span className="cb-count">{cb.attended}/{cb.total}</span>
+                                                                            <span className={`cb-pct ${cb.statusClass}`}>{cb.percent}%</span>
+                                                                        </div>
+                                                                        <div className="cb-bar-track">
+                                                                            <div className={`cb-bar-fill ${cb.statusClass}`} style={{ width: `${cb.percent}%` }}></div>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {/* --- BIOMETRIC TABLE --- */}
+                {viewMode === 'biometric' && (
+                    <div className="table-responsive">
+                        <div className="biometric-banner">
+                            <Fingerprint size={16} />
+                            <span>Dalium Biometric daily check-in attendance — tracks physical presence at college.</span>
+                        </div>
+                        <table className="attendance-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>ID Number</th>
+                                    <th>Program &amp; Year</th>
+                                    <th>Days Present</th>
+                                    <th>Working Days</th>
+                                    <th>Biometric %</th>
+                                    <th>Last Check-in</th>
+                                    <th style={{ textAlign: 'right' }}>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredRecords.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="8" className="empty-state-message">
+                                            No biometric records available
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredRecords.map((record, idx) => {
+                                        const bioPct = record.bioPercent || 0;
+                                        let bioStatusClass = 'status-inactive';
+                                        let bioStatus = 'No Data';
+                                        if (bioPct >= 85) { bioStatusClass = 'status-ready'; bioStatus = 'Good'; }
+                                        else if (bioPct >= 75) { bioStatusClass = 'status-processing'; bioStatus = 'Warning'; }
+                                        else if (bioPct > 0) { bioStatusClass = 'status-maintenance'; bioStatus = 'Critical'; }
+
+                                        return (
+                                            <tr key={idx}>
+                                                <td>
+                                                    <div className="student-cell">
+                                                        <div className="student-avatar bio-avatar">
+                                                            <Fingerprint size={14} />
+                                                        </div>
+                                                        <div className="student-info">
+                                                            <span className="student-name">{record.name}</span>
+                                                            <span className="student-email">{record.email}</span>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><span className="mono-text">{record.id}</span></td>
+                                                <td><span className="program-text">{record.program}</span></td>
+                                                <td>
+                                                    <span className="classes-text">
+                                                        {record.bioTotalDays > 0
+                                                            ? `${record.bioPresentDays} / ${record.bioTotalDays}`
+                                                            : <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>No records</span>
+                                                        }
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span className="classes-text">
+                                                        {record.bioWorkingDays > 0 ? record.bioWorkingDays : '—'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span className={`att-percent ${bioStatusClass}`}>
+                                                        {bioPct > 0 ? `${bioPct}%` : '—'}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {record.lastCheckin ? (
+                                                        <div>
+                                                            <span style={{ fontSize: '13px' }}>{record.lastCheckin}</span>
+                                                            <span className={`check-status-pill ${record.lastCheckinStatus === 'LATE' ? 'late' : 'present'}`}>
+                                                                {record.lastCheckinStatus}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>No check-in</span>
+                                                    )}
+                                                </td>
+                                                <td style={{ textAlign: 'right' }}>
+                                                    <span className={`status-badge ${bioStatusClass}`}>
+                                                        {bioStatus}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {/* Summary Legend */}
                 {attendanceRecords.length > 0 && (
-                    <div style={{ padding: '12px 0 0', display: 'flex', gap: '20px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--glass-border)', marginTop: '8px' }}>
-                        <span>✅ Good ≥85%: <strong style={{ color: '#10B981' }}>{attendanceRecords.filter(r => r.attendancePercent >= 85).length}</strong></span>
-                        <span>⚠️ Warning 75–84%: <strong style={{ color: '#F59E0B' }}>{attendanceRecords.filter(r => r.attendancePercent >= 75 && r.attendancePercent < 85).length}</strong></span>
-                        <span>🚨 Critical &lt;75%: <strong style={{ color: '#EF4444' }}>{attendanceRecords.filter(r => r.attendancePercent > 0 && r.attendancePercent < 75).length}</strong></span>
-                        <span>❓ No Data: <strong>{attendanceRecords.filter(r => r.attendancePercent === 0).length}</strong></span>
+                    <div style={{ padding: '12px 0 0', display: 'flex', gap: '20px', fontSize: '12px', color: 'var(--text-muted)', borderTop: '1px solid var(--glass-border)', marginTop: '8px', flexWrap: 'wrap' }}>
+                        {viewMode === 'course' ? (
+                            <>
+                                <span>✅ Good ≥85%: <strong style={{ color: '#10B981' }}>{attendanceRecords.filter(r => r.attendancePercent >= 85).length}</strong></span>
+                                <span>⚠️ Warning 75–84%: <strong style={{ color: '#F59E0B' }}>{attendanceRecords.filter(r => r.attendancePercent >= 75 && r.attendancePercent < 85).length}</strong></span>
+                                <span>🚨 Critical &lt;75%: <strong style={{ color: '#EF4444' }}>{attendanceRecords.filter(r => r.attendancePercent > 0 && r.attendancePercent < 75).length}</strong></span>
+                                <span>❓ No Data: <strong>{attendanceRecords.filter(r => r.attendancePercent === 0).length}</strong></span>
+                                <span style={{ marginLeft: 'auto', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                    💡 Click a row to expand course-wise breakdown
+                                </span>
+                            </>
+                        ) : (
+                            <>
+                                <span>✅ Good ≥85%: <strong style={{ color: '#10B981' }}>{attendanceRecords.filter(r => (r.bioPercent || 0) >= 85).length}</strong></span>
+                                <span>⚠️ Warning 75–84%: <strong style={{ color: '#F59E0B' }}>{attendanceRecords.filter(r => (r.bioPercent || 0) >= 75 && (r.bioPercent || 0) < 85).length}</strong></span>
+                                <span>🚨 Critical &lt;75%: <strong style={{ color: '#EF4444' }}>{attendanceRecords.filter(r => (r.bioPercent || 0) > 0 && (r.bioPercent || 0) < 75).length}</strong></span>
+                                <span>❓ No Biometric Data: <strong>{attendanceRecords.filter(r => !r.bioTotalDays || r.bioTotalDays === 0).length}</strong></span>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
-
         </div>
     );
 };

@@ -121,6 +121,21 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
             </div>
 
             <div className="sidebar-bottom">
+                
+                {/* Profile Icon for Mobile/Tablet */}
+                <NavLink
+                    to="/my-profile"
+                    onClick={() => setIsOpen && setIsOpen(false)}
+                    className={({ isActive }) => `f-nav-link sidebar-profile-nav ${isActive ? 'active' : ''}`}
+                >
+                    {userData?.profilePictureUrl ? (
+                         <img src={userData.profilePictureUrl} alt="avatar" style={{width: 24, height: 24, borderRadius: '50%', objectFit: 'cover'}} />
+                    ) : (
+                         <User size={22} />
+                    )}
+                    <div className="f-tooltip">Profile</div>
+                </NavLink>
+
                 <div
                     className="logout-btn-pill"
                     onClick={() => {

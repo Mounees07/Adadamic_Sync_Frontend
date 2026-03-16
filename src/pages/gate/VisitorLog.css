@@ -2,7 +2,7 @@
 
 .visitor-dashboard {
     padding: 2rem;
-    max-width: 1400px;
+    max-width: 100%;
     /* Wider for tables */
     margin: 0 auto;
     min-height: 80vh;

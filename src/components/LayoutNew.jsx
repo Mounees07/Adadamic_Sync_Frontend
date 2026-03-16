@@ -30,7 +30,7 @@ const LayoutNew = ({ children }) => {
 
             <main className="main-content">
                 <Navbar toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
-                <div className="page-content animate-fade-in" style={{ padding: '24px', flex: 1 }}>
+                <div className="page-content animate-fade-in" style={{ flex: 1 }}>
                     {children ? children : <Outlet />}
                 </div>
             </main>

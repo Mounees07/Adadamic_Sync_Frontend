@@ -151,11 +151,6 @@ const Navbar = ({ toggleSidebar }) => {
                             </div>
                         )}
                     </div>
-
-                    <button className="icon-btn nav-secondary-action">
-                        <MessageCircle size={20} />
-                    </button>
-
                     <button className="icon-btn nav-secondary-action">
                         <Bell size={20} />
                         <span className="notification-dot"></span>
@@ -165,7 +160,12 @@ const Navbar = ({ toggleSidebar }) => {
                         <LogOut size={20} />
                     </button>
 
-                    <div className="user-profile-wrapper" ref={profileMenuRef}>
+                    <div 
+                        className="user-profile-wrapper" 
+                        ref={profileMenuRef}
+                        onMouseEnter={() => setIsProfileMenuOpen(true)}
+                        onMouseLeave={() => setIsProfileMenuOpen(false)}
+                    >
                         <div
                             className="user-profile"
                             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}

@@ -3,14 +3,17 @@
     display: grid;
     grid-template-columns: 1fr 350px;
     gap: 2rem;
-    padding: 2rem;
+    padding: 1rem 0;
     min-height: calc(100vh - 80px);
     font-family: 'Inter', sans-serif;
+    box-sizing: border-box;
 }
 
 @media (max-width: 768px) {
     .dashboard-layout-new {
         grid-template-columns: 1fr;
+        padding: 0;
+        gap: 1.5rem;
     }
 }
 
