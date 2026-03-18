@@ -27,7 +27,6 @@ const Navbar = ({ toggleSidebar }) => {
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
     const profileMenuRef = useRef(null);
 
-
     const handleLogout = async () => {
         try {
             await logout();
@@ -37,6 +36,32 @@ const Navbar = ({ toggleSidebar }) => {
         }
     };
 
+    const [isNotifMenuOpen, setIsNotifMenuOpen] = useState(false);
+    const notifMenuRef = useRef(null);
+    const [recentNotifs, setRecentNotifs] = useState([]);
+    const [unreadNotifCount, setUnreadNotifCount] = useState(0);
+
+    // Fetch notifications for the top bar
+    useEffect(() => {
+        if (!userData || !userData.uid) return;
+        const fetchNavNotifs = async () => {
+            try {
+                const fetchPromise = await fetch(`http://localhost:8080/api/notifications/user/${userData.uid}`);
+                if (!fetchPromise.ok) return;
+                const data = await fetchPromise.json();
+                if (data && Array.isArray(data)) {
+                    setRecentNotifs(data.slice(0, 5));
+                    setUnreadNotifCount(data.filter(n => !n.isRead).length);
+                }
+            } catch (e) {
+                // Ignore API connection errors for the badge
+            }
+        };
+        fetchNavNotifs();
+        const interval = setInterval(fetchNavNotifs, 30000);
+        return () => clearInterval(interval);
+    }, [userData]);
+
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (themeMenuRef.current && !themeMenuRef.current.contains(event.target)) {
@@ -44,6 +69,9 @@ const Navbar = ({ toggleSidebar }) => {
             }
             if (profileMenuRef.current && !profileMenuRef.current.contains(event.target)) {
                 setIsProfileMenuOpen(false);
+            }
+            if (notifMenuRef.current && !notifMenuRef.current.contains(event.target)) {
+                setIsNotifMenuOpen(false);
             }
         };
 
@@ -151,10 +179,46 @@ const Navbar = ({ toggleSidebar }) => {
                             </div>
                         )}
                     </div>
-                    <button className="icon-btn nav-secondary-action">
-                        <Bell size={20} />
-                        <span className="notification-dot"></span>
-                    </button>
+                    
+                    <div className="notif-nav-wrapper" ref={notifMenuRef} style={{ position: 'relative' }}>
+                        <button 
+                            className="icon-btn nav-secondary-action" 
+                            onClick={() => setIsNotifMenuOpen(!isNotifMenuOpen)}
+                            title="Notifications"
+                        >
+                            <Bell size={20} />
+                            {unreadNotifCount > 0 && <span className="notification-dot"></span>}
+                        </button>
+
+                        {isNotifMenuOpen && (
+                            <div className="nav-notif-dropdown animate-fade-in custom-scrollbar">
+                                <div className="nav-notif-header">
+                                    <h4>Notifications</h4>
+                                    {unreadNotifCount > 0 && <span>{unreadNotifCount} new</span>}
+                                </div>
+                                <div className="nav-notif-body">
+                                    {recentNotifs.length === 0 ? (
+                                        <div className="nav-notif-empty">
+                                            <Bell size={32} opacity={0.2} />
+                                            <p>No new notifications</p>
+                                        </div>
+                                    ) : (
+                                        recentNotifs.map(n => (
+                                            <div key={n.id} className={`nav-notif-item ${!n.isRead ? 'unread' : ''}`}>
+                                                <div className="nav-notif-content">
+                                                    <h5>{n.title}</h5>
+                                                    <p>{n.message}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                                <div className="nav-notif-footer" onClick={() => { setIsNotifMenuOpen(false); navigate(userData?.role === 'STUDENT' ? '/student/notifications' : '/dashboard'); }}>
+                                    View full inbox
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     <button className="icon-btn nav-logout-btn" onClick={handleLogout} title="Logout">
                         <LogOut size={20} />

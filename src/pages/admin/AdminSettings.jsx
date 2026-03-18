@@ -390,7 +390,7 @@ const AdminSettings = () => {
                                     <h3>Security Policies</h3>
                                 </div>
                                 <div className="form-content">
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+                                    <div className="section-grid" style={{ gap: '24px' }}>
                                         <InputField
                                             label="Min Password Length"
                                             name="policy.password.minLength"
@@ -428,7 +428,7 @@ const AdminSettings = () => {
                                 <Database size={24} color="#7c6bdc" />
                                 <h3>Module Management</h3>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '40px' }}>
+                            <div className="section-grid" style={{ gap: '12px', marginBottom: '40px' }}>
                                 {[
                                     { key: 'feature.leave.enabled', label: 'Leave Management', desc: 'Student leave requests & mentor approvals.', icon: '🏖️' },
                                     { key: 'feature.result.enabled', label: 'Results Module', desc: 'COE publishes exam results for students.', icon: '📊' },
@@ -459,7 +459,7 @@ const AdminSettings = () => {
                                 <AlertCircle size={24} color="#FB7D5B" />
                                 <h3>Academic Policies</h3>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', marginBottom: '24px' }}>
+                            <div className="section-grid" style={{ gap: '24px', marginBottom: '24px' }}>
                                 <InputField
                                     label="Minimum Attendance Threshold (%)"
                                     name="policy.attendance.threshold"

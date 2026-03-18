@@ -175,10 +175,10 @@ const AdminCourseManagement = () => {
         <div className="dashboard-layout-new">
             <div className="dashboard-main-col">
                 <div className="dash-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                        <h3>Course Oversight</h3>
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <div className="search-bar" style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '16px' }}>
+                        <h3 style={{ margin: 0 }}>Course Oversight</h3>
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', flex: '1 1 auto', justifyContent: 'flex-end' }}>
+                            <div className="search-bar" style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px', maxWidth: '100%' }}>
                                 <Search size={18} color="var(--text-secondary)" />
                                 <input
                                     type="text"

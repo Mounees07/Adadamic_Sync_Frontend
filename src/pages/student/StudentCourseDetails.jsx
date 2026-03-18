@@ -271,37 +271,37 @@ const StudentCourseDetails = () => {
             </div>
 
             {/* Attendance Summary */}
-            <div className="attendance-summary-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 24px', backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e2e8f0', marginBottom: '24px', boxShadow: '0 1px 3px rgba(0,0,0,0.02)' }}>
+            <div className="attendance-summary-card">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div style={{ backgroundColor: '#f1f5f9', padding: '10px', borderRadius: '50%', color: '#64748b' }}>
+                    <div style={{ backgroundColor: 'rgba(100, 116, 139, 0.1)', padding: '10px', borderRadius: '50%', color: 'var(--text-secondary)' }}>
                         <Clock size={20} />
                     </div>
                     <div>
-                        <h4 style={{ margin: 0, fontSize: '15px', color: '#1e293b', fontWeight: '700' }}>My Attendance</h4>
-                        <p style={{ margin: 0, fontSize: '13px', color: '#64748b' }}>Overall class participation</p>
+                        <h4 style={{ margin: 0, fontSize: '15px', color: 'var(--text-primary)', fontWeight: '700' }}>My Attendance</h4>
+                        <p style={{ margin: 0, fontSize: '13px', color: 'var(--text-secondary)' }}>Overall class participation</p>
                     </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                <div className="attendance-stats-row">
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '18px', fontWeight: '800', color: '#3b82f6' }}>{myAttendances.length}</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em' }}>Total</div>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>Total</div>
                     </div>
-                    <div style={{ width: '1px', height: '32px', backgroundColor: '#e2e8f0' }}></div>
+                    <div className="attendance-divider"></div>
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '18px', fontWeight: '800', color: '#10b981' }}>{myAttendances.filter(a => a.status === 'P').length}</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em' }}>Present</div>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>Present</div>
                     </div>
-                    <div style={{ width: '1px', height: '32px', backgroundColor: '#e2e8f0' }}></div>
+                    <div className="attendance-divider"></div>
                     <div style={{ textAlign: 'center' }}>
                         <div style={{ fontSize: '18px', fontWeight: '800', color: '#ef4444' }}>{myAttendances.filter(a => a.status === 'A').length}</div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em' }}>Absent</div>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>Absent</div>
                     </div>
-                    <div style={{ width: '1px', height: '32px', backgroundColor: '#e2e8f0' }}></div>
+                    <div className="attendance-divider"></div>
                     <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '18px', fontWeight: '800', color: '#1e293b' }}>
+                        <div style={{ fontSize: '18px', fontWeight: '800', color: 'var(--text-primary)' }}>
                             {myAttendances.length > 0 ? Math.round((myAttendances.filter(a => a.status === 'P').length / myAttendances.length) * 100) : 0}%
                         </div>
-                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: '#94a3b8', letterSpacing: '0.05em' }}>Percentage</div>
+                        <div style={{ fontSize: '11px', fontWeight: '600', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.05em' }}>Percentage</div>
                     </div>
                 </div>
             </div>
