@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Download, Users, BookOpen, GraduationCap, AlertTriangle, ChevronLeft, ChevronRight, MoreVertical, UploadCloud, Plus, Filter, Calendar } from 'lucide-react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
+import { Search, Download, Users, BookOpen, GraduationCap, AlertTriangle, ChevronLeft, ChevronRight, MoreVertical, UploadCloud, Plus } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import { exportData } from '../../utils/exportUtils';
+import { parseSpreadsheetFile, validateImportedRows } from '../../utils/importUtils';
 import './HODStudents.css';
 
 const HODStudents = () => {
@@ -13,6 +15,12 @@ const HODStudents = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('All Students');
     const [currentPage, setCurrentPage] = useState(1);
+    const [programFilter, setProgramFilter] = useState('ALL');
+    const [yearFilter, setYearFilter] = useState('ALL');
+    const [statusMessage, setStatusMessage] = useState(null);
+    const [exportFormat, setExportFormat] = useState('csv');
+    const [importing, setImporting] = useState(false);
+    const importInputRef = useRef(null);
     const itemsPerPage = 6;
 
     useEffect(() => {
@@ -74,7 +82,7 @@ const HODStudents = () => {
         setCurrentPage(1);
     };
 
-    const filteredStudents = students.filter(s => {
+    const filteredStudents = useMemo(() => students.filter(s => {
         const matchesSearch = s.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             s.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             s.email?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -84,8 +92,83 @@ const HODStudents = () => {
         if (activeTab === 'Postgraduates') matchesTab = s.programName?.includes('M.Sc') || s.programName?.includes('Ph.D');
         if (activeTab === 'Alumni') matchesTab = s.status === 'Graduated';
 
-        return matchesSearch && matchesTab;
-    });
+        const matchesProg = programFilter === 'ALL' || s.programName?.toLowerCase().includes(programFilter.toLowerCase());
+        const matchesYear = yearFilter === 'ALL' || s.yearName === yearFilter;
+
+        return matchesSearch && matchesTab && matchesProg && matchesYear;
+    }), [students, searchTerm, activeTab, programFilter, yearFilter]);
+
+    const exportColumns = [
+        { header: 'Name', key: 'fullName' },
+        { header: 'Roll Number', key: 'rollNumber' },
+        { header: 'Program', key: 'programName' },
+        { header: 'Year', key: 'yearLevel' },
+        { header: 'GPA', key: 'gpa' },
+        { header: 'Status', key: 'status' }
+    ];
+
+    const handleExport = () => {
+        if (filteredStudents.length === 0) {
+            setStatusMessage({ type: 'error', text: 'There is no filtered student data to export.' });
+            return;
+        }
+
+        exportData({
+            format: exportFormat,
+            fileName: 'students_directory',
+            title: 'Students Directory',
+            rows: filteredStudents,
+            columns: exportColumns,
+            sheetName: 'Students'
+        });
+        setStatusMessage({ type: 'success', text: `Exported ${filteredStudents.length} student record(s) as ${exportFormat.toUpperCase()}.` });
+    };
+
+    const handleImportClick = () => {
+        importInputRef.current?.click();
+    };
+
+    const handleImportFile = async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        setImporting(true);
+        setStatusMessage(null);
+
+        try {
+            const parsedRows = await parseSpreadsheetFile(file);
+            const validRows = validateImportedRows(parsedRows, ['full_name', 'roll_number']);
+            const importedStudents = validRows.map((row, index) => ({
+                id: `import-${Date.now()}-${index}`,
+                fullName: row.full_name,
+                rollNumber: row.roll_number,
+                programName: row.program_name || row.program || resolvedDept || userData?.department || 'Imported Program',
+                programType: row.program_type || 'Imported',
+                yearName: row.year_name || row.year || 'Unknown',
+                yearLevel: row.year_level || row.year || 'Imported',
+                gpa: row.gpa || '-',
+                status: row.status || 'Active',
+                email: row.email || '',
+                profilePictureUrl: ''
+            }));
+
+            setStudents((prev) => [...importedStudents, ...prev]);
+            setStats((prev) => ({
+                ...prev,
+                totalStudents: (prev.totalStudents || 0) + importedStudents.length,
+                undergraduates: prev.undergraduates || 0,
+                postgraduates: prev.postgraduates || 0,
+                atRisk: prev.atRisk || 0
+            }));
+            setCurrentPage(1);
+            setStatusMessage({ type: 'success', text: `Imported ${importedStudents.length} student record(s) from ${file.name}.` });
+        } catch (error) {
+            setStatusMessage({ type: 'error', text: error.message || 'Import failed. Please check the file and try again.' });
+        } finally {
+            setImporting(false);
+            event.target.value = '';
+        }
+    };
 
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage) || 1;
     const paginatedStudents = filteredStudents.slice(
@@ -108,14 +191,36 @@ const HODStudents = () => {
                     <p>Manage and view all enrolled students in the department.</p>
                 </div>
                 <div className="header-actions">
-                    <button className="import-btn">
-                        <UploadCloud size={16} /> Import
+                    <input
+                        ref={importInputRef}
+                        type="file"
+                        accept=".csv,.xlsx"
+                        hidden
+                        onChange={handleImportFile}
+                    />
+                    <button className="import-btn" onClick={handleImportClick} disabled={importing}>
+                        <UploadCloud size={16} /> {importing ? 'Importing...' : 'Import'}
                     </button>
                     <button className="add-student-btn">
                         <Plus size={16} /> Add Student
                     </button>
                 </div>
             </div>
+
+            {statusMessage && (
+                <div
+                    style={{
+                        marginBottom: '16px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: `1px solid ${statusMessage.type === 'error' ? 'rgba(239,68,68,0.28)' : 'rgba(34,197,94,0.28)'}`,
+                        background: statusMessage.type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                        color: statusMessage.type === 'error' ? '#b91c1c' : '#166534'
+                    }}
+                >
+                    {statusMessage.text}
+                </div>
+            )}
 
             <div className="students-stats-grid">
                 <div className="s-stat-card">
@@ -175,13 +280,31 @@ const HODStudents = () => {
                         />
                     </div>
                     <div className="directory-filters">
-                        <button className="filter-dropdown">
-                            <Filter size={16} className="text-muted" /> Program
-                        </button>
-                        <button className="filter-dropdown">
-                            <Calendar size={16} className="text-muted" /> Year
-                        </button>
-                        <button className="icon-btn-filter">
+                        <select className="filter-dropdown" style={{ padding: '6px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer' }}
+                            value={programFilter} onChange={e => { setProgramFilter(e.target.value); setCurrentPage(1); }}>
+                            <option value="ALL">All Programs</option>
+                            <option value="B.Sc">Undergraduate (B.Sc)</option>
+                            <option value="M.Sc">Postgraduate (M.Sc)</option>
+                        </select>
+                        <select className="filter-dropdown" style={{ padding: '6px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer' }}
+                            value={yearFilter} onChange={e => { setYearFilter(e.target.value); setCurrentPage(1); }}>
+                            <option value="ALL">All Years</option>
+                            <option value="Freshman">Freshman</option>
+                            <option value="Sophomore">Sophomore</option>
+                            <option value="Junior">Junior</option>
+                            <option value="Senior">Senior</option>
+                        </select>
+                        <select
+                            className="filter-dropdown"
+                            style={{ padding: '6px 10px', borderRadius: '8px', background: 'var(--bg-secondary)', border: '1px solid var(--glass-border)', color: 'var(--text-primary)', fontSize: '0.85rem', cursor: 'pointer' }}
+                            value={exportFormat}
+                            onChange={(e) => setExportFormat(e.target.value)}
+                        >
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">Excel (XLSX)</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                        <button className="icon-btn-filter" onClick={handleExport} title={`Export ${exportFormat.toUpperCase()}`}>
                             <Download size={16} />
                         </button>
                     </div>

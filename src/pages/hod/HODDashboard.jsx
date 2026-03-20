@@ -280,16 +280,16 @@ const HODDashboard = () => {
                                 </tr>
                             ) : (
                                 coreCourses.map((course, idx) => {
-                                    const instructor = 'Sathish Kumar'; // Dummy, since course API doesn't have instructors
-                                    const progress = 75 + (idx * 5) % 25; // 75-100 random looking progress
+                                    const instructor = course.primaryInstructor || 'Unassigned';
+                                    const progress = Number(course.syllabusCompletion ?? 0);
                                     return (
                                         <tr key={idx}>
-                                            <td className="font-medium">{course.code || `CS${100+idx}`}</td>
-                                            <td>{course.name}</td>
+                                            <td className="font-medium">{course.courseCode || `CS${100+idx}`}</td>
+                                            <td>{course.courseName}</td>
                                             <td>
                                                 <div className="instructor-cell">
                                                     <div className="small-avatar bg-light-blue">
-                                                        {instructor.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                                                        {(course.primaryInstructorInitials || instructor.split(' ').map(n => n[0]).join('').slice(0, 2))}
                                                     </div>
                                                     {instructor}
                                                 </div>

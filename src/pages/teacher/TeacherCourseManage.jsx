@@ -81,6 +81,9 @@ const TeacherCourseManage = () => {
     const [studentAttendanceHistory, setStudentAttendanceHistory] = useState([]);
     const [sectionTotalSessions, setSectionTotalSessions] = useState(0);
     const [loadingStudent, setLoadingStudent] = useState(false);
+    const [syllabusCompletion, setSyllabusCompletion] = useState(0);
+    const [savingSyllabus, setSavingSyllabus] = useState(false);
+    const [syllabusMessage, setSyllabusMessage] = useState('');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -109,6 +112,7 @@ const TeacherCourseManage = () => {
                 if (details) {
                     setSectionDetails(details);
                     setTestEnabled(details.testsEnabled || false);
+                    setSyllabusCompletion(details.syllabusCompletion ?? 0);
                     if (details.course?.id) {
                         fetchLessons(details.course.id);
                     }
@@ -354,6 +358,27 @@ const TeacherCourseManage = () => {
         }
     };
 
+    const handleSaveSyllabusCompletion = async () => {
+        setSavingSyllabus(true);
+        setSyllabusMessage('');
+        try {
+            const res = await api.patch(`/courses/sections/${sectionId}/syllabus-completion`, {
+                syllabusCompletion
+            });
+            setSectionDetails((prev) => ({
+                ...prev,
+                syllabusCompletion: res.data.syllabusCompletion ?? syllabusCompletion
+            }));
+            setSyllabusCompletion(res.data.syllabusCompletion ?? syllabusCompletion);
+            setSyllabusMessage('Syllabus completion updated.');
+        } catch (error) {
+            console.error("Failed to update syllabus completion", error);
+            setSyllabusMessage('Failed to update syllabus completion.');
+        } finally {
+            setSavingSyllabus(false);
+        }
+    };
+
     const handleGradeClick = (submission) => {
         setGradingSubmission(submission);
         setGradeForm({
@@ -490,8 +515,46 @@ const TeacherCourseManage = () => {
                         {sectionDetails?.course?.name}
                     </h1>
                     <div className="banner-stats">
-                        <div className="stat-item"><Users size={16} style={{ color: 'var(--primary)' }} /><span>Instructor <b className="stat-value" style={{ color: '#eef2ff' }}>{sectionDetails?.faculty?.fullName}</b></span></div>
-                        <div className="stat-item"><Clock size={16} style={{ color: 'var(--primary)' }} /><span>Difficulty: <b className="stat-value" style={{ color: '#eef2ff' }}>{sectionDetails?.course?.difficultyLevel || 'Standard'}</b></span></div>
+                        <div className="stat-item"><Users size={16} style={{ color: 'var(--primary)' }} /><span>Instructor <b className="stat-value">{sectionDetails?.faculty?.fullName}</b></span></div>
+                        <div className="stat-item"><Clock size={16} style={{ color: 'var(--primary)' }} /><span>Difficulty: <b className="stat-value">{sectionDetails?.course?.difficultyLevel || 'Standard'}</b></span></div>
+                    </div>
+
+                    <div className="syllabus-progress-card">
+                        <div className="syllabus-progress-top">
+                            <div>
+                                <div className="syllabus-progress-label">Syllabus Completion</div>
+                                <div className="syllabus-progress-value">{syllabusCompletion}%</div>
+                            </div>
+                            <button
+                                onClick={handleSaveSyllabusCompletion}
+                                className="btn-premium btn-primary-purple"
+                                disabled={savingSyllabus}
+                                type="button"
+                            >
+                                <Save size={16} /> {savingSyllabus ? 'Saving...' : 'Update Progress'}
+                            </button>
+                        </div>
+                        <input
+                            type="range"
+                            min="0"
+                            max="100"
+                            step="5"
+                            value={syllabusCompletion}
+                            onChange={(e) => {
+                                setSyllabusCompletion(Number(e.target.value));
+                                setSyllabusMessage('');
+                            }}
+                            className="syllabus-progress-slider"
+                        />
+                        <div className="syllabus-progress-scale">
+                            <span>Not started</span>
+                            <span>Completed</span>
+                        </div>
+                        {syllabusMessage && (
+                            <div className={`syllabus-progress-message ${syllabusMessage.startsWith('Failed') ? 'error' : 'success'}`}>
+                                {syllabusMessage}
+                            </div>
+                        )}
                     </div>
 
                     <div className="banner-actions">

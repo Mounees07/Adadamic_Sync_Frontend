@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
@@ -15,6 +15,7 @@ import {
     TrendingDown,
     Loader2
 } from 'lucide-react';
+import { exportData } from '../../utils/exportUtils';
 import './HODAcademicPerformance.css';
 
 const HODAcademicPerformance = () => {
@@ -43,6 +44,9 @@ const HODAcademicPerformance = () => {
     const [lowestCohort, setLowestCohort] = useState('N/A');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [exportFormat, setExportFormat] = useState('pdf');
+    const [tableSearch, setTableSearch] = useState('');
+    const [statusMessage, setStatusMessage] = useState(null);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -87,6 +91,65 @@ const HODAcademicPerformance = () => {
         fetchData();
     }, [currentUser, userData]);
 
+    // Compute insight strings from real data
+    const aboveAvgPct = gpaDistribution
+        .filter(g => ['O (9-10)', 'A+ (8-9)', 'A (7-8)'].includes(g.label))
+        .reduce((sum, g) => sum + g.percent, 0)
+        .toFixed(1);
+    const belowPassPct = gpaDistribution.find(g => g.label === '< 5')?.percent ?? 0;
+    const filteredProbationStudents = useMemo(() => probationStudents.filter((student) =>
+        [student.cohort, student.reason, student.level]
+            .join(' ')
+            .toLowerCase()
+            .includes(tableSearch.toLowerCase())
+    ), [probationStudents, tableSearch]);
+    const filteredDeansListStudents = useMemo(() => deansListStudents.filter((student) =>
+        [student.program, student.courses, student.avgGpa]
+            .join(' ')
+            .toLowerCase()
+            .includes(tableSearch.toLowerCase())
+    ), [deansListStudents, tableSearch]);
+
+    const handleExport = () => {
+        const rows = [
+            ...filteredProbationStudents.map((student) => ({
+                section: 'Academic Probation',
+                cohort: student.cohort,
+                students: student.count,
+                metric: student.reason,
+                detail: student.level
+            })),
+            ...filteredDeansListStudents.map((student) => ({
+                section: "Dean's List",
+                cohort: student.program,
+                students: student.count,
+                metric: student.avgGpa,
+                detail: student.courses
+            }))
+        ];
+
+        if (rows.length === 0) {
+            setStatusMessage({ type: 'error', text: 'There is no visible academic performance data to export.' });
+            return;
+        }
+
+        exportData({
+            format: exportFormat,
+            fileName: 'academic_performance',
+            title: 'Academic Performance Overview',
+            rows,
+            columns: [
+                { header: 'Section', key: 'section' },
+                { header: 'Cohort / Program', key: 'cohort' },
+                { header: 'Students', key: 'students' },
+                { header: 'Metric', key: 'metric' },
+                { header: 'Detail', key: 'detail' }
+            ],
+            sheetName: 'Performance'
+        });
+        setStatusMessage({ type: 'success', text: `Exported visible academic performance rows as ${exportFormat.toUpperCase()}.` });
+    };
+
     if (loading) {
         return (
             <div className="academic-performance-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '12px' }}>
@@ -105,13 +168,6 @@ const HODAcademicPerformance = () => {
             </div>
         );
     }
-
-    // Compute insight strings from real data
-    const aboveAvgPct = gpaDistribution
-        .filter(g => ['O (9-10)', 'A+ (8-9)', 'A (7-8)'].includes(g.label))
-        .reduce((sum, g) => sum + g.percent, 0)
-        .toFixed(1);
-    const belowPassPct = gpaDistribution.find(g => g.label === '< 5')?.percent ?? 0;
 
     return (
         <div className="academic-performance-container">
@@ -132,14 +188,45 @@ const HODAcademicPerformance = () => {
                     <button className="btn-secondary">
                         <Calendar size={16} /> Current Semester
                     </button>
-                    <button className="btn-secondary">
+                    <input
+                        type="text"
+                        value={tableSearch}
+                        onChange={(e) => setTableSearch(e.target.value)}
+                        placeholder="Filter table rows..."
+                        style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                    />
+                    <button className="btn-secondary" onClick={() => window.print()}>
                         <Printer size={16} /> Print
                     </button>
-                    <button className="btn-primary">
-                        <Download size={16} /> Export PDF
+                    <select
+                        value={exportFormat}
+                        onChange={(e) => setExportFormat(e.target.value)}
+                        style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                    >
+                        <option value="pdf">PDF</option>
+                        <option value="xlsx">Excel (XLSX)</option>
+                        <option value="csv">CSV</option>
+                    </select>
+                    <button className="btn-primary" onClick={handleExport}>
+                        <Download size={16} /> Export Data
                     </button>
                 </div>
             </header>
+
+            {statusMessage && (
+                <div
+                    style={{
+                        marginBottom: '16px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: `1px solid ${statusMessage.type === 'error' ? 'rgba(239,68,68,0.28)' : 'rgba(34,197,94,0.28)'}`,
+                        background: statusMessage.type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                        color: statusMessage.type === 'error' ? '#b91c1c' : '#166534'
+                    }}
+                >
+                    {statusMessage.text}
+                </div>
+            )}
 
             {/* Top Stat Cards */}
             <div className="kpi-cards-grid">
@@ -309,14 +396,14 @@ const HODAcademicPerformance = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {probationStudents.length === 0 ? (
+                                {filteredProbationStudents.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="text-center text-muted" style={{ padding: '24px' }}>
                                             {stats.totalEnrolled === 0 ? 'No student data found for this department' : 'No students on academic probation — great performance!'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    probationStudents.map((st, idx) => (
+                                    filteredProbationStudents.map((st, idx) => (
                                         <tr key={idx}>
                                             <td>{st.cohort}</td>
                                             <td><strong>{st.count}</strong></td>
@@ -351,14 +438,14 @@ const HODAcademicPerformance = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {deansListStudents.length === 0 ? (
+                                {filteredDeansListStudents.length === 0 ? (
                                     <tr>
                                         <td colSpan="4" className="text-center text-muted" style={{ padding: '24px' }}>
                                             {stats.totalEnrolled === 0 ? 'No student data found for this department' : 'No students currently meeting Dean\'s List criteria (GPA ≥ 8.5)'}
                                         </td>
                                     </tr>
                                 ) : (
-                                    deansListStudents.map((dl, idx) => (
+                                    filteredDeansListStudents.map((dl, idx) => (
                                         <tr key={idx}>
                                             <td>{dl.program}</td>
                                             <td><strong>{dl.count}</strong></td>

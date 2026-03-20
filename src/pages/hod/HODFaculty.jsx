@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Search, Download, Users, GraduationCap, Plane, Briefcase, ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
+import { exportData } from '../../utils/exportUtils';
 import './HODFaculty.css';
 
 const HODFaculty = () => {
@@ -12,6 +13,8 @@ const HODFaculty = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('All Members');
     const [currentPage, setCurrentPage] = useState(1);
+    const [exportFormat, setExportFormat] = useState('csv');
+    const [statusMessage, setStatusMessage] = useState(null);
     const itemsPerPage = 6;
 
     useEffect(() => {
@@ -54,7 +57,7 @@ const HODFaculty = () => {
     };
 
     // Filter by search and tab (dummy logic for tabs right now)
-    const filteredFaculty = faculty.filter(f => {
+    const filteredFaculty = useMemo(() => faculty.filter(f => {
         const matchesSearch = f.fullName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             f.email?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -64,7 +67,33 @@ const HODFaculty = () => {
         // Add more specific filtering if roles allow
 
         return matchesSearch && matchesTab;
-    });
+    }), [faculty, searchTerm, activeTab]);
+
+    const exportColumns = [
+        { header: 'Name', key: 'fullName' },
+        { header: 'Role', accessor: (row) => row.role === 'HOD' ? 'Head of Department' : row.role === 'PROFESSOR' ? 'Professor' : 'Assistant Professor' },
+        { header: 'Department', accessor: (row) => row.department ? `${row.department} Dept` : 'General Faculty' },
+        { header: 'Email', key: 'email' },
+        { header: 'Phone', accessor: (row) => row.mobileNumber || '' },
+        { header: 'Status', accessor: () => 'Active' }
+    ];
+
+    const handleExport = () => {
+        if (filteredFaculty.length === 0) {
+            setStatusMessage({ type: 'error', text: 'There is no visible faculty data to export.' });
+            return;
+        }
+
+        exportData({
+            format: exportFormat,
+            fileName: 'faculty_directory',
+            title: 'Faculty Directory',
+            rows: filteredFaculty,
+            columns: exportColumns,
+            sheetName: 'Faculty'
+        });
+        setStatusMessage({ type: 'success', text: `Exported ${filteredFaculty.length} faculty record(s) as ${exportFormat.toUpperCase()}.` });
+    };
 
     const totalPages = Math.ceil(filteredFaculty.length / itemsPerPage) || 1;
     const paginatedFaculty = filteredFaculty.slice(
@@ -97,10 +126,36 @@ const HODFaculty = () => {
                     <h1>Faculty & Staff Directory</h1>
                     <p>Manage department personnel, academic roles, and availability.</p>
                 </div>
-                <button className="export-csv-btn">
-                    <Download size={16} /> Export CSV
-                </button>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <select
+                        value={exportFormat}
+                        onChange={(e) => setExportFormat(e.target.value)}
+                        style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                    >
+                        <option value="csv">CSV</option>
+                        <option value="xlsx">Excel (XLSX)</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                    <button className="export-csv-btn" onClick={handleExport}>
+                        <Download size={16} /> Export Data
+                    </button>
+                </div>
             </div>
+
+            {statusMessage && (
+                <div
+                    style={{
+                        marginBottom: '16px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: `1px solid ${statusMessage.type === 'error' ? 'rgba(239,68,68,0.28)' : 'rgba(34,197,94,0.28)'}`,
+                        background: statusMessage.type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                        color: statusMessage.type === 'error' ? '#b91c1c' : '#166534'
+                    }}
+                >
+                    {statusMessage.text}
+                </div>
+            )}
 
             <div className="faculty-stats-grid">
                 <div className="f-stat-card">

@@ -124,7 +124,7 @@ const UserDetailsModal = ({ user, mode, onClose, onSave }) => {
                                         className="sdm-input"
                                         style={{ appearance: 'auto' }}
                                     >
-                                        {['STUDENT', 'TEACHER', 'MENTOR', 'HOD', 'ADMIN', 'COE', 'PRINCIPAL', 'GATE_SECURITY'].map(r => (
+                                        {['STUDENT', 'TEACHER', 'MENTOR', 'HOD', 'ADMIN', 'COE', 'PRINCIPAL', 'GATE_SECURITY', 'PLACEMENT_COORDINATOR'].map(r => (
                                             <option key={r} value={r}>{r}</option>
                                         ))}
                                     </select>

@@ -78,7 +78,7 @@ const StudentPlacement = () => {
         preferredCompanies: '',
     });
 
-    const canManagePlacement = Boolean(userData?.role && userData.role !== 'STUDENT');
+    const canManagePlacement = userData?.role === 'PLACEMENT_COORDINATOR' || userData?.role === 'ADMIN';
 
     useEffect(() => {
         if (!currentUser) return;
@@ -284,6 +284,14 @@ const StudentPlacement = () => {
                             <CheckCircle size={16} color={p.skillsCompleted >= 7 ? '#10b981' : '#6366f1'} />
                             <span>Skills: {p.skillsCompleted || 0}/{p.totalSkills || 10} completed</span>
                         </div>
+                        <div className="pc-item">
+                            <Briefcase size={16} color={p.placementStatus === 'PLACED' ? '#10b981' : '#6366f1'} />
+                            <span>Placement Status: {p.placementStatus || 'NOT_READY'}</span>
+                        </div>
+                        <div className="pc-item">
+                            <CheckCircle size={16} color={p.resumeReviewStatus === 'APPROVED' ? '#10b981' : p.resumeReviewStatus === 'REJECTED' ? '#ef4444' : '#f59e0b'} />
+                            <span>Resume Review: {p.resumeReviewStatus || 'PENDING'}</span>
+                        </div>
                     </div>
 
                     {!canManagePlacement ? (
@@ -315,6 +323,13 @@ const StudentPlacement = () => {
                             <div className="pc-title">Career Preferences</div>
                             {p.preferredRole ? <div className="pref-item"><strong>Role:</strong> {p.preferredRole}</div> : null}
                             {p.preferredCompanies ? <div className="pref-item"><strong>Target:</strong> {p.preferredCompanies}</div> : null}
+                        </div>
+                    ) : null}
+
+                    {p.resumeRemarks ? (
+                        <div className="placement-prefs-card">
+                            <div className="pc-title">Coordinator Feedback</div>
+                            <div className="pref-item">{p.resumeRemarks}</div>
                         </div>
                     ) : null}
                 </div>

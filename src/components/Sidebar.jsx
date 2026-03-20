@@ -14,6 +14,7 @@ import {
     ShieldCheck,
     TrendingUp,
     ClipboardCheck,
+    Briefcase,
     User,
     Bird,
     DollarSign,
@@ -28,7 +29,11 @@ const Sidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    const homeRoute = userData?.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
+    const homeRoute = userData?.role === 'ADMIN'
+        ? '/admin/dashboard'
+        : userData?.role === 'PLACEMENT_COORDINATOR'
+            ? '/placement-coordinator/dashboard'
+            : '/dashboard';
     const isOnHome = location.pathname === homeRoute;
 
     const studentLinks = [
@@ -98,6 +103,13 @@ const Sidebar = () => {
         { to: '/admin/settings', icon: <Settings size={22} />, label: 'System Settings' },
     ];
 
+    const placementCoordinatorLinks = [
+        { to: '/placement-coordinator/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
+        { to: '/placement-coordinator/students', icon: <GraduationCap size={22} />, label: 'Students' },
+        { to: '/placement-coordinator/drives', icon: <Briefcase size={22} />, label: 'Drives' },
+        { to: '/placement-coordinator/analytics', icon: <TrendingUp size={22} />, label: 'Analytics' },
+    ];
+
     const coeLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
         { to: '/coe/schedule-exams', icon: <CalendarIcon size={22} />, label: 'Exam Schedule' },
@@ -119,6 +131,7 @@ const Sidebar = () => {
             case 'HOD': return hodLinks;
             case 'PRINCIPAL': return principalLinks;
             case 'ADMIN': return adminLinks;
+            case 'PLACEMENT_COORDINATOR': return placementCoordinatorLinks;
             case 'COE': return coeLinks;
             case 'GATE_SECURITY': return gateSecurityLinks;
             default: return [];

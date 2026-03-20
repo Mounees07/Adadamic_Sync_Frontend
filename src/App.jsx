@@ -48,6 +48,7 @@ const StudentFeeHistory = React.lazy(() => import('./pages/student/StudentFeeHis
 const StudentPerformance = React.lazy(() => import('./pages/student/StudentPerformance'));
 const StudentNotifications = React.lazy(() => import('./pages/student/StudentNotifications'));
 const StudentPlacement = React.lazy(() => import('./pages/student/StudentPlacement'));
+const PlacementCoordinatorDashboard = React.lazy(() => import('./pages/placement/PlacementCoordinatorDashboard'));
 
 const TeacherQuestionManager = React.lazy(() => import('./pages/teacher/TeacherQuestionManager'));
 const TeacherAttendanceLog = React.lazy(() => import('./pages/teacher/TeacherAttendanceLog'));
@@ -121,6 +122,7 @@ const RoleBasedRedirect = () => {
     case 'HOD': return <Navigate to="/hod/dashboard" replace />;
     case 'PRINCIPAL': return <Navigate to="/principal/dashboard" replace />;
     case 'ADMIN': return <Navigate to="/admin/dashboard" replace />;
+    case 'PLACEMENT_COORDINATOR': return <Navigate to="/placement-coordinator/dashboard" replace />;
     case 'COE': return <Navigate to="/coe/dashboard" replace />;
     case 'GATE_SECURITY': return <Navigate to="/gate/dashboard" replace />;
     default: return <DashboardOverview />;
@@ -243,6 +245,12 @@ function App() {
                     <Route path="admin/settings" element={<AdminSettings />} />
                     <Route path="admin/finance" element={<AdminFinance />} />
                     <Route path="admin/faculty-leaves" element={<AdminLeaveApprovals />} />
+
+                    {/* Placement Coordinator Routes */}
+                    <Route path="placement-coordinator/dashboard" element={<PlacementCoordinatorDashboard />} />
+                    <Route path="placement-coordinator/students" element={<PlacementCoordinatorDashboard />} />
+                    <Route path="placement-coordinator/drives" element={<PlacementCoordinatorDashboard />} />
+                    <Route path="placement-coordinator/analytics" element={<PlacementCoordinatorDashboard />} />
 
 
 

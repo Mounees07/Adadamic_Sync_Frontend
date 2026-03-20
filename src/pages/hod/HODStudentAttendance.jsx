@@ -51,6 +51,8 @@ const HODStudentAttendance = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedRows, setExpandedRows] = useState({});
     const [viewMode, setViewMode] = useState('course'); // 'course' | 'biometric'
+    const [statusFilter, setStatusFilter] = useState('ALL'); // ALL | Good | Warning | Critical
+    const [showStatusFilter, setShowStatusFilter] = useState(false);
 
     useEffect(() => {
         const fetchAttendanceData = async () => {
@@ -94,11 +96,32 @@ const HODStudentAttendance = () => {
         setExpandedRows(prev => ({ ...prev, [idx]: !prev[idx] }));
     };
 
-    const filteredRecords = attendanceRecords.filter(r =>
-        !searchQuery ||
-        r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.id?.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    const filteredRecords = attendanceRecords.filter(r => {
+        const matchesSearch = !searchQuery ||
+            r.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            r.id?.toLowerCase().includes(searchQuery.toLowerCase());
+        if (!matchesSearch) return false;
+        if (statusFilter === 'ALL') return true;
+        if (statusFilter === 'Good') return viewMode === 'course' ? r.attendancePercent >= 85 : (r.bioPercent || 0) >= 85;
+        if (statusFilter === 'Warning') return viewMode === 'course' ? (r.attendancePercent >= 75 && r.attendancePercent < 85) : ((r.bioPercent || 0) >= 75 && (r.bioPercent || 0) < 85);
+        if (statusFilter === 'Critical') return viewMode === 'course' ? (r.attendancePercent > 0 && r.attendancePercent < 75) : ((r.bioPercent || 0) > 0 && (r.bioPercent || 0) < 75);
+        return true;
+    });
+
+    const handleExportCSV = () => {
+        const headers = viewMode === 'course'
+            ? ['Name', 'ID', 'Program', 'Classes Attended', 'Total Classes', 'Attendance %', 'Status']
+            : ['Name', 'ID', 'Program', 'Days Present', 'Working Days', 'Biometric %', 'Last Check-in', 'Status'];
+        const rows = filteredRecords.map(r => viewMode === 'course'
+            ? [r.name, r.id, r.program, r.classesAttended, r.totalClasses, `${r.attendancePercent}%`, r.status]
+            : [r.name, r.id, r.program, r.bioPresentDays || 0, r.bioWorkingDays || 0, `${r.bioPercent || 0}%`, r.lastCheckin || '', r.status]
+        );
+        const csv = [headers, ...rows].map(row => row.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `attendance_${viewMode}.csv`; a.click();
+        URL.revokeObjectURL(url);
+    };
 
     if (loading) {
         return (
@@ -133,10 +156,10 @@ const HODStudentAttendance = () => {
                     </div>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-secondary">
+                    <button className="btn-secondary" onClick={() => window.print()}>
                         <Printer size={16} /> Print Report
                     </button>
-                    <button className="btn-primary">
+                    <button className="btn-primary" onClick={handleExportCSV}>
                         <Download size={16} /> Export CSV
                     </button>
                 </div>
@@ -289,9 +312,32 @@ const HODStudentAttendance = () => {
                                 onChange={e => setSearchQuery(e.target.value)}
                             />
                         </div>
-                        <button className="icon-filter-btn">
-                            <Filter size={16} />
-                        </button>
+                        <div style={{ position: 'relative' }}>
+                            <button className="icon-filter-btn" onClick={() => setShowStatusFilter(v => !v)} title="Filter by status">
+                                <Filter size={16} />{statusFilter !== 'ALL' && <span style={{ marginLeft: '4px', fontSize: '11px', fontWeight: 700 }}>{statusFilter}</span>}
+                            </button>
+                            {showStatusFilter && (
+                                <div style={{
+                                    position: 'absolute', top: '110%', right: 0, zIndex: 99,
+                                    background: 'var(--bg-card)', border: '1px solid var(--glass-border)',
+                                    borderRadius: '12px', padding: '8px', minWidth: '150px',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                                }}>
+                                    {['ALL', 'Good', 'Warning', 'Critical'].map(s => (
+                                        <button key={s} onClick={() => { setStatusFilter(s); setShowStatusFilter(false); }}
+                                            style={{
+                                                display: 'block', width: '100%', textAlign: 'left',
+                                                padding: '8px 12px', background: statusFilter === s ? 'var(--primary)' : 'transparent',
+                                                color: statusFilter === s ? 'white' : 'var(--text-primary)',
+                                                border: 'none', borderRadius: '8px', cursor: 'pointer',
+                                                fontSize: '0.85rem', fontWeight: statusFilter === s ? 700 : 400
+                                            }}>
+                                            {s === 'ALL' ? '🔍 All Students' : s === 'Good' ? '✅ Good (≥85%)' : s === 'Warning' ? '⚠️ Warning (75-84%)' : '🚨 Critical (<75%)'}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
 

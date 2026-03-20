@@ -26,6 +26,21 @@ const TeacherGrading = () => {
     const [gradingSubmission, setGradingSubmission] = useState(null);
     const [gradeForm, setGradeForm] = useState({ grade: '', feedback: '' });
     const [isSubmittingGrade, setIsSubmittingGrade] = useState(false);
+    const [statusFilter, setStatusFilter] = useState('ALL'); // ALL | PENDING | GRADED
+
+    const handleExportGrades = () => {
+        const rows = submissions.map(s => [
+            s.student?.fullName || '', s.student?.rollNumber || '',
+            s.assignment?.title || '', s.grade !== null ? s.grade : 'Pending',
+            s.assignment?.maxPoints || 100, new Date(s.submissionDate).toLocaleDateString()
+        ]);
+        const headers = ['Student', 'Roll No', 'Assignment', 'Grade', 'Max Points', 'Submitted'];
+        const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `grades_${selectedSection?.course?.code || 'export'}.csv`; a.click();
+        URL.revokeObjectURL(url);
+    };
 
     useEffect(() => {
         const fetchSections = async () => {
@@ -142,11 +157,20 @@ const TeacherGrading = () => {
                             Submissions
                             <span className="text-xs bg-gray-800 text-gray-400 px-2 py-1 rounded-full">{submissions.length}</span>
                         </h2>
-                        {/* <div className="flex gap-2">
-                            <button className="px-4 py-2 rounded-xl bg-gray-800 text-xs font-bold uppercase hover:bg-gray-700 transition-colors">
-                                <Filter size={14} className="inline mr-2" /> Filter
-                            </button>
-                        </div> */}
+                        <div className="flex gap-2">
+                            {['ALL', 'PENDING', 'GRADED'].map(f => (
+                                <button key={f} onClick={() => setStatusFilter(f)}
+                                    className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-colors ${statusFilter === f ? 'bg-indigo-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}>
+                                    <Filter size={14} className="inline mr-2" />{f}
+                                </button>
+                            ))}
+                            {submissions.length > 0 && (
+                                <button onClick={handleExportGrades}
+                                    className="px-4 py-2 rounded-xl bg-gray-800 text-xs font-bold uppercase hover:bg-gray-700 transition-colors text-gray-400">
+                                    Export CSV
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {loadingSubmissions ? (
@@ -173,7 +197,11 @@ const TeacherGrading = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {submissions.map(sub => (
+                                    {submissions.filter(sub => {
+                                        if (statusFilter === 'PENDING') return sub.grade === null;
+                                        if (statusFilter === 'GRADED') return sub.grade !== null;
+                                        return true;
+                                    }).map(sub => (
                                         <tr key={sub.id}>
                                             <td>
                                                 <div className="flex items-center gap-3">

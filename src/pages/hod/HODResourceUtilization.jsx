@@ -297,7 +297,19 @@ const HODResourceUtilization = () => {
                     <button className="btn-primary" onClick={() => setShowAdd(true)}>
                         <Plus size={16}/> Add Resource
                     </button>
-                    <button className="btn-secondary"><Download size={16}/> Export</button>
+                    <button className="btn-secondary" onClick={() => {
+                        const headers = ['Name', 'Type', 'Block', 'Capacity', 'Systems', 'Sys. Maint.', 'Occupancy %', 'Status', 'Notes'];
+                        const rows = filtered.map(r => [
+                            r.name, r.resourceType, r.block || '', r.capacity ?? '', 
+                            r.systemCount ?? '', r.systemsUnderMaintenance ?? '',
+                            r.occupancyPercent ?? '', r.status, r.notes || ''
+                        ]);
+                        const csv = [headers, ...rows].map(row => row.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+                        const blob = new Blob([csv], { type: 'text/csv' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a'); a.href = url; a.download = `resources_${dept || 'export'}.csv`; a.click();
+                        URL.revokeObjectURL(url);
+                    }}><Download size={16}/> Export</button>
                 </div>
             </header>
 

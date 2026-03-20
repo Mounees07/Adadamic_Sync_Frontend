@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { Users, BookOpen, GraduationCap, Search, Filter, X, ChevronRight, ChevronLeft, Phone, Edit, Save, SlidersHorizontal } from 'lucide-react';
+import React, { useMemo, useState, useEffect } from 'react';
+import { Users, BookOpen, GraduationCap, Search, Filter, X, ChevronRight, ChevronLeft, Phone, Edit, Save, SlidersHorizontal, Download } from 'lucide-react';
 import api from '../../utils/api';
+import { exportData } from '../../utils/exportUtils';
 import './Admin.css';
 
 const AdminDataReports = () => {
@@ -14,6 +15,11 @@ const AdminDataReports = () => {
     const [isEditing, setIsEditing] = useState(false);
     const [editFormData, setEditFormData] = useState({});
     const [updateLoading, setUpdateLoading] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [roleFilter, setRoleFilter] = useState('ALL');
+    const [departmentFilter, setDepartmentFilter] = useState('ALL');
+    const [exportFormat, setExportFormat] = useState('csv');
+    const [statusMessage, setStatusMessage] = useState(null);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -25,6 +31,10 @@ const AdminDataReports = () => {
         setSelectedUser(null);
         setIsEditing(false);
         setCurrentPage(1);
+        setRoleFilter('ALL');
+        setDepartmentFilter('ALL');
+        setShowFilters(false);
+        setStatusMessage(null);
     }, [activeTab]);
 
     useEffect(() => {
@@ -73,7 +83,7 @@ const AdminDataReports = () => {
         setLoading(true);
         try {
             if (activeTab === 'faculty') {
-                const roles = ['TEACHER', 'HOD', 'MENTOR'];
+                const roles = ['TEACHER', 'HOD', 'MENTOR', 'PLACEMENT_COORDINATOR'];
                 const promises = roles.map(role => api.get(`/users/role/${role}`).catch(() => ({ data: [] })));
                 const results = await Promise.all(promises);
                 const combined = results.flatMap(r => r.data);
@@ -118,12 +128,52 @@ const AdminDataReports = () => {
         return colors[index];
     };
 
-    const filteredData = data.filter(u =>
-        (u.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (u.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (u.department || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (u.rollNumber || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const roleOptions = useMemo(() => ['ALL', ...Array.from(new Set(data.map((item) => item.role).filter(Boolean)))], [data]);
+    const departmentOptions = useMemo(() => ['ALL', ...Array.from(new Set(data.map((item) => item.department).filter(Boolean)))], [data]);
+
+    const filteredData = useMemo(() => data.filter((u) => {
+        const matchesSearch =
+            (u.fullName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (u.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (u.department || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (u.rollNumber || '').toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesRole = roleFilter === 'ALL' || u.role === roleFilter;
+        const matchesDepartment = departmentFilter === 'ALL' || u.department === departmentFilter;
+        return matchesSearch && matchesRole && matchesDepartment;
+    }), [data, searchTerm, roleFilter, departmentFilter]);
+
+    const exportColumns = [
+        { header: 'Name', key: 'fullName' },
+        { header: 'Role', key: 'role' },
+        { header: 'Department', key: 'department' },
+        { header: 'Roll Number', key: 'rollNumber' },
+        { header: 'Email', key: 'email' },
+        { header: 'Phone', accessor: (row) => row.mobileNumber || row.phoneNumber || '' }
+    ];
+
+    const handleExport = () => {
+        if (filteredData.length === 0) {
+            setStatusMessage({ type: 'error', text: 'There is no visible data to export.' });
+            return;
+        }
+
+        exportData({
+            format: exportFormat,
+            fileName: `${activeTab}_institutional_data`,
+            title: activeTab === 'faculty' ? 'Faculty Institutional Data' : 'Student Institutional Data',
+            rows: filteredData,
+            columns: exportColumns,
+            sheetName: activeTab === 'faculty' ? 'Faculty' : 'Students'
+        });
+        setStatusMessage({ type: 'success', text: `Exported ${filteredData.length} ${activeTab} row(s) as ${exportFormat.toUpperCase()}.` });
+    };
+
+    const clearFilters = () => {
+        setRoleFilter('ALL');
+        setDepartmentFilter('ALL');
+        setSearchTerm('');
+        setCurrentPage(1);
+    };
 
     // Pagination Logic
     const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -186,14 +236,87 @@ const AdminDataReports = () => {
                         />
                     </div>
                     {/* Action Buttons */}
-                    <button className="action-btn-yellow">
+                    <button className="action-btn-yellow" onClick={() => setShowFilters((prev) => !prev)} title="Show filters">
                         <SlidersHorizontal size={24} />
                     </button>
-                    <button className="action-btn-yellow">
-                        <Filter size={24} />
-                    </button>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <select
+                            value={exportFormat}
+                            onChange={(e) => setExportFormat(e.target.value)}
+                            style={{ padding: '10px 12px', borderRadius: '999px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                        >
+                            <option value="csv">CSV</option>
+                            <option value="xlsx">Excel (XLSX)</option>
+                            <option value="pdf">PDF</option>
+                        </select>
+                        <button className="action-btn-yellow" onClick={handleExport} title={`Export ${exportFormat.toUpperCase()}`}>
+                            <Download size={24} />
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            {statusMessage && (
+                <div
+                    style={{
+                        marginBottom: '16px',
+                        padding: '12px 14px',
+                        borderRadius: '14px',
+                        border: `1px solid ${statusMessage.type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(34,197,94,0.3)'}`,
+                        background: statusMessage.type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                        color: statusMessage.type === 'error' ? '#b91c1c' : '#166534'
+                    }}
+                >
+                    {statusMessage.text}
+                </div>
+            )}
+
+            {showFilters && (
+                <div
+                    style={{
+                        display: 'flex',
+                        gap: '12px',
+                        flexWrap: 'wrap',
+                        alignItems: 'center',
+                        padding: '16px 20px',
+                        marginBottom: '18px',
+                        borderRadius: '20px',
+                        border: '1px solid var(--glass-border)',
+                        background: 'var(--bg-card)',
+                        boxShadow: 'var(--shadow-subtle)'
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)', fontWeight: 600 }}>
+                        <Filter size={16} />
+                        Filters
+                    </div>
+                    <select
+                        value={roleFilter}
+                        onChange={(e) => { setRoleFilter(e.target.value); setCurrentPage(1); }}
+                        style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                    >
+                        {roleOptions.map((role) => (
+                            <option key={role} value={role}>{role === 'ALL' ? 'All Roles' : role}</option>
+                        ))}
+                    </select>
+                    <select
+                        value={departmentFilter}
+                        onChange={(e) => { setDepartmentFilter(e.target.value); setCurrentPage(1); }}
+                        style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-secondary)', color: 'var(--text-primary)' }}
+                    >
+                        {departmentOptions.map((department) => (
+                            <option key={department} value={department}>{department === 'ALL' ? 'All Departments' : department}</option>
+                        ))}
+                    </select>
+                    <button
+                        className="action-btn-yellow"
+                        onClick={clearFilters}
+                        title="Clear filters"
+                    >
+                        <X size={20} />
+                    </button>
+                </div>
+            )}
 
             {/* Table Section */}
             <div className="student-table-card">
@@ -406,7 +529,7 @@ const AdminDataReports = () => {
                                                 onChange={handleEditChange}
                                                 style={{ padding: '4px', borderRadius: '4px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
                                             >
-                                                {['STUDENT', 'TEACHER', 'MENTOR', 'HOD', 'PRINCIPAL', 'COE', 'ADMIN'].map(r => (
+                                                {['STUDENT', 'TEACHER', 'MENTOR', 'HOD', 'PRINCIPAL', 'COE', 'ADMIN', 'PLACEMENT_COORDINATOR'].map(r => (
                                                     <option key={r} value={r}>{r}</option>
                                                 ))}
                                             </select>

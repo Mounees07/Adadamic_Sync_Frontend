@@ -14,6 +14,7 @@ import {
     ShieldCheck,
     TrendingUp,
     ClipboardCheck,
+    Briefcase,
     User,
     LogOut,
     DollarSign
@@ -73,6 +74,13 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
         { to: '/admin/reports', icon: <FileText size={22} />, label: 'Reports' },
         { to: '/admin/settings', icon: <Settings size={22} />, label: 'Settings' },
     ];
+
+    const placementCoordinatorLinks = [
+        { to: '/placement-coordinator/dashboard', icon: <LayoutDashboard size={22} />, label: 'Overview' },
+        { to: '/placement-coordinator/students', icon: <GraduationCap size={22} />, label: 'Students' },
+        { to: '/placement-coordinator/drives', icon: <Briefcase size={22} />, label: 'Drives' },
+        { to: '/placement-coordinator/analytics', icon: <TrendingUp size={22} />, label: 'Analytics' },
+    ];
  
     const coeLinks = [
         { to: '/dashboard', icon: <LayoutDashboard size={22} />, label: 'Dashboard' },
@@ -94,6 +102,7 @@ const FloatingSidebar = ({ isOpen, setIsOpen }) => {
             case 'MENTOR': return mentorLinks;
             case 'HOD': return hodLinks;
             case 'ADMIN': return adminLinks;
+            case 'PLACEMENT_COORDINATOR': return placementCoordinatorLinks;
             case 'COE': return coeLinks;
             case 'GATE_SECURITY': return securityLinks;
             default: return studentLinks;

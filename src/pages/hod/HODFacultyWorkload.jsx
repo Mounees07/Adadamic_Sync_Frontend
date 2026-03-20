@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
@@ -24,6 +24,7 @@ import {
     Tooltip
 } from 'recharts';
 import Loader from '../../components/Loader';
+import { exportData } from '../../utils/exportUtils';
 import './HODFacultyWorkload.css';
 
 const HODFacultyWorkload = () => {
@@ -42,6 +43,11 @@ const HODFacultyWorkload = () => {
     const [workloadRecords, setWorkloadRecords] = useState([]);
     const [distributionData, setDistributionData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState('ALL');
+    const [exportFormat, setExportFormat] = useState('csv');
+    const [showFilters, setShowFilters] = useState(false);
+    const [statusMessage, setStatusMessage] = useState(null);
 
     useEffect(() => {
         const fetchWorkloadData = async () => {
@@ -67,6 +73,41 @@ const HODFacultyWorkload = () => {
         fetchWorkloadData();
     }, [currentUser, userData]);
 
+    const filteredWorkloadRecords = useMemo(() => workloadRecords.filter((record) => {
+        const matchesSearch =
+            record.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            record.role?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesStatus = statusFilter === 'ALL' || record.status === statusFilter;
+        return matchesSearch && matchesStatus;
+    }), [workloadRecords, searchTerm, statusFilter]);
+
+    const exportColumns = [
+        { header: 'Faculty Member', key: 'name' },
+        { header: 'Role', key: 'role' },
+        { header: 'Teaching Hours', accessor: (row) => row.teaching },
+        { header: 'Research Hours', accessor: (row) => row.research },
+        { header: 'Admin Hours', accessor: (row) => row.admin },
+        { header: 'Total Hours', accessor: (row) => row.total },
+        { header: 'Status', key: 'status' }
+    ];
+
+    const handleExport = () => {
+        if (filteredWorkloadRecords.length === 0) {
+            setStatusMessage({ type: 'error', text: 'There is no visible workload data to export.' });
+            return;
+        }
+
+        exportData({
+            format: exportFormat,
+            fileName: 'faculty_workload',
+            title: 'Faculty Workload',
+            rows: filteredWorkloadRecords,
+            columns: exportColumns,
+            sheetName: 'Workload'
+        });
+        setStatusMessage({ type: 'success', text: `Exported ${filteredWorkloadRecords.length} workload row(s) as ${exportFormat.toUpperCase()}.` });
+    };
+
     if (loading) {
         return <Loader fullScreen={false} text="Loading Faculty Workload Data..." />
     }
@@ -85,7 +126,16 @@ const HODFacultyWorkload = () => {
                     <p>Teaching hours, research output, and administrative allocations across the department.</p>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-secondary">
+                    <select
+                        value={exportFormat}
+                        onChange={(e) => setExportFormat(e.target.value)}
+                        style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                    >
+                        <option value="csv">CSV</option>
+                        <option value="xlsx">Excel (XLSX)</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                    <button className="btn-secondary" onClick={handleExport}>
                         <Download size={16} /> Export Data
                     </button>
                     <button className="btn-primary" onClick={() => navigate('/department-analytics/adjust-allocations')}>
@@ -93,6 +143,21 @@ const HODFacultyWorkload = () => {
                     </button>
                 </div>
             </header>
+
+            {statusMessage && (
+                <div
+                    style={{
+                        marginBottom: '16px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: `1px solid ${statusMessage.type === 'error' ? 'rgba(239,68,68,0.28)' : 'rgba(34,197,94,0.28)'}`,
+                        background: statusMessage.type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                        color: statusMessage.type === 'error' ? '#b91c1c' : '#166534'
+                    }}
+                >
+                    {statusMessage.text}
+                </div>
+            )}
 
             {/* KPI Cards */}
             <div className="kpi-cards-grid-workload">
@@ -159,13 +224,42 @@ const HODFacultyWorkload = () => {
                         <div className="table-actions">
                             <div className="search-box">
                                 <Search size={16} className="search-icon" />
-                                <input type="text" placeholder="Search faculty..." />
+                                <input
+                                    type="text"
+                                    placeholder="Search faculty..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </div>
-                            <button className="icon-filter-btn">
+                            <button className="icon-filter-btn" onClick={() => setShowFilters((prev) => !prev)} title="Filter workload">
                                 <Filter size={16} />
                             </button>
                         </div>
                     </div>
+
+                    {showFilters && (
+                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '14px' }}>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => setStatusFilter(e.target.value)}
+                                style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                            >
+                                <option value="ALL">All Statuses</option>
+                                <option value="Balanced">Balanced</option>
+                                <option value="Overloaded">Overloaded</option>
+                                <option value="Available">Available</option>
+                            </select>
+                            <button
+                                className="btn-secondary"
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    setStatusFilter('ALL');
+                                }}
+                            >
+                                Clear Filters
+                            </button>
+                        </div>
+                    )}
 
                     <div className="table-wrapper">
                         <table className="workload-table">
@@ -180,14 +274,14 @@ const HODFacultyWorkload = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {workloadRecords.length === 0 ? (
+                                {filteredWorkloadRecords.length === 0 ? (
                                     <tr>
                                         <td colSpan="6" className="empty-state-message">
-                                            No faculty workload records available
+                                            No faculty workload records match the current filters
                                         </td>
                                     </tr>
                                 ) : (
-                                    workloadRecords.map((record, idx) => (
+                                    filteredWorkloadRecords.map((record, idx) => (
                                         <tr key={idx}>
                                             <td>
                                                 <div className="faculty-cell">

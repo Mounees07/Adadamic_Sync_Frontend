@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../utils/api';
@@ -20,6 +20,7 @@ import {
     Tooltip,
     ResponsiveContainer
 } from 'recharts';
+import { exportData } from '../../utils/exportUtils';
 import './HODAnalytics.css';
 
 const HODAnalytics = () => {
@@ -28,6 +29,9 @@ const HODAnalytics = () => {
 
     const [analyticsData, setAnalyticsData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [reportSearch, setReportSearch] = useState('');
+    const [exportFormat, setExportFormat] = useState('csv');
+    const [statusMessage, setStatusMessage] = useState(null);
 
     useEffect(() => {
         const fetchAnalytics = async () => {
@@ -84,6 +88,46 @@ const HODAnalytics = () => {
         statusColor: "status-ready"
     })) || [];
 
+    const exportRows = [
+        { metric: 'Total Students', value: analyticsData?.totalStudents ?? 'N/A' },
+        { metric: 'Average GPA', value: analyticsData?.averageGpa ?? 'N/A' },
+        { metric: 'Average Attendance', value: analyticsData?.averageAttendance ?? 'N/A' },
+        { metric: 'Pass Rate', value: analyticsData?.passRate ?? 'N/A' },
+        ...((analyticsData?.performanceDistribution || []).map((point) => ({ metric: `GPA Period: ${point.name}`, value: point.value }))),
+        ...((analyticsData?.attendanceByYear || []).map((point) => ({ metric: `Attendance ${point.yearClass}`, value: point.attendance })))
+    ];
+
+    const filteredReports = useMemo(() => recentReports.filter((report) =>
+        [report.title, report.subtitle, report.type, report.date]
+            .join(' ')
+            .toLowerCase()
+            .includes(reportSearch.toLowerCase())
+    ), [recentReports, reportSearch]);
+
+    const handleExportData = () => {
+        if (exportRows.length === 0) {
+            setStatusMessage({ type: 'error', text: 'There is no analytics data to export.' });
+            return;
+        }
+
+        exportData({
+            format: exportFormat,
+            fileName: 'department_analytics',
+            title: 'Department Analytics',
+            rows: exportRows,
+            columns: [
+                { header: 'Metric', key: 'metric' },
+                { header: 'Value', key: 'value' }
+            ],
+            sheetName: 'Analytics'
+        });
+        setStatusMessage({ type: 'success', text: `Exported analytics summary as ${exportFormat.toUpperCase()}.` });
+    };
+
+    const handleNewReport = () => {
+        window.print();
+    };
+
     return (
         <div className="analytics-container-new">
             <header className="reports-header">
@@ -92,14 +136,38 @@ const HODAnalytics = () => {
                     <p>View, generate, and export departmental data and performance metrics.</p>
                 </div>
                 <div className="header-actions">
-                    <button className="btn-export">
+                    <select
+                        value={exportFormat}
+                        onChange={(e) => setExportFormat(e.target.value)}
+                        style={{ padding: '10px 12px', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                    >
+                        <option value="csv">CSV</option>
+                        <option value="xlsx">Excel (XLSX)</option>
+                        <option value="pdf">PDF</option>
+                    </select>
+                    <button className="btn-export" onClick={handleExportData}>
                         <Download size={16} /> Export Data
                     </button>
-                    <button className="btn-new-report">
+                    <button className="btn-new-report" onClick={handleNewReport}>
                         <FileText size={16} /> New Report
                     </button>
                 </div>
             </header>
+
+            {statusMessage && (
+                <div
+                    style={{
+                        marginBottom: '16px',
+                        padding: '12px 14px',
+                        borderRadius: '12px',
+                        border: `1px solid ${statusMessage.type === 'error' ? 'rgba(239,68,68,0.28)' : 'rgba(34,197,94,0.28)'}`,
+                        background: statusMessage.type === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(34,197,94,0.08)',
+                        color: statusMessage.type === 'error' ? '#b91c1c' : '#166534'
+                    }}
+                >
+                    {statusMessage.text}
+                </div>
+            )}
 
             <div className="reports-cards-grid">
                 <div
@@ -186,7 +254,12 @@ const HODAnalytics = () => {
                     <h3>Recent Reports</h3>
                     <div className="search-box">
                         <Search size={16} className="search-icon" />
-                        <input type="text" placeholder="Search reports..." />
+                        <input
+                            type="text"
+                            placeholder="Search reports..."
+                            value={reportSearch}
+                            onChange={(e) => setReportSearch(e.target.value)}
+                        />
                     </div>
                 </div>
                 <div className="table-responsive">
@@ -201,7 +274,7 @@ const HODAnalytics = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {recentReports.map((report, idx) => (
+                            {filteredReports.map((report, idx) => (
                                 <tr key={idx}>
                                     <td>
                                         <div className="report-name-cell">
@@ -223,6 +296,13 @@ const HODAnalytics = () => {
                                     </td>
                                 </tr>
                             ))}
+                            {filteredReports.length === 0 && (
+                                <tr>
+                                    <td colSpan="5" style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
+                                        No reports match the current search.
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>

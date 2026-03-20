@@ -11,6 +11,8 @@ const AdminTeacherList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedTeachers, setSelectedTeachers] = useState([]);
+    const [roleFilter, setRoleFilter] = useState('ALL');
+    const [showFilterMenu, setShowFilterMenu] = useState(false);
     const itemsPerPage = 8;
 
     // Modal State
@@ -52,10 +54,24 @@ const AdminTeacherList = () => {
     };
 
     const filteredTeachers = teachers.filter(teacher =>
-        (teacher.fullName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        ((teacher.fullName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (teacher.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (teacher.rollNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+        (teacher.rollNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())) &&
+        (roleFilter === 'ALL' || teacher.role === roleFilter)
     );
+
+    const handleExportCSV = () => {
+        const headers = ['Name', 'Email', 'Role', 'Department', 'Phone', 'Address'];
+        const rows = filteredTeachers.map(t => [
+            t.fullName || '', t.email || '', t.role || '',
+            t.department || '', t.mobileNumber || '', t.address || ''
+        ]);
+        const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'faculty_list.csv'; a.click();
+        URL.revokeObjectURL(url);
+    };
 
     const totalPages = Math.ceil(filteredTeachers.length / itemsPerPage);
     const paginatedTeachers = filteredTeachers.slice(
@@ -143,10 +159,33 @@ const AdminTeacherList = () => {
                         />
                     </div>
                     {/* Action Buttons */}
-                    <button className="action-btn-yellow">
-                        <SlidersHorizontal size={24} />
-                    </button>
-                    <button className="action-btn-yellow">
+                    <div style={{ position: 'relative' }}>
+                        <button className="action-btn-yellow" title="Filter by Role" onClick={() => setShowFilterMenu(v => !v)}>
+                            <SlidersHorizontal size={24} />
+                        </button>
+                        {showFilterMenu && (
+                            <div style={{
+                                position: 'absolute', top: '110%', right: 0, zIndex: 99,
+                                background: 'var(--bg-card)', border: '1px solid var(--glass-border)',
+                                borderRadius: '12px', padding: '8px', minWidth: '160px',
+                                boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                            }}>
+                                {['ALL', 'TEACHER', 'MENTOR', 'HOD'].map(role => (
+                                    <button key={role} onClick={() => { setRoleFilter(role); setShowFilterMenu(false); setCurrentPage(1); }}
+                                        style={{
+                                            display: 'block', width: '100%', textAlign: 'left',
+                                            padding: '8px 12px', background: roleFilter === role ? 'var(--primary)' : 'transparent',
+                                            color: roleFilter === role ? 'white' : 'var(--text-primary)',
+                                            border: 'none', borderRadius: '8px', cursor: 'pointer',
+                                            fontSize: '0.85rem', fontWeight: roleFilter === role ? 700 : 400
+                                        }}>
+                                        {role === 'ALL' ? 'All Roles' : role}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button className="action-btn-yellow" title="Export CSV" onClick={handleExportCSV}>
                         <Filter size={24} />
                     </button>
                     <button

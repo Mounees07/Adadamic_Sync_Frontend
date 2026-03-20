@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, User, Calendar, Clock } from 'lucide-react';
+import { BookOpen, Clock } from 'lucide-react';
 import api from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import './StudentCourses.css';
@@ -79,6 +79,19 @@ const StudentCourses = () => {
                                             <div className="rp-title">{enrollment.section.faculty?.fullName || 'Unknown Faculty'}</div>
                                             <div className="rp-sub">Course Instructor</div>
                                         </div>
+                                    </div>
+                                </div>
+
+                                <div className="tc-progress-block">
+                                    <div className="tc-progress-head">
+                                        <span>Syllabus Completion</span>
+                                        <strong>{enrollment.section.syllabusCompletion ?? 0}%</strong>
+                                    </div>
+                                    <div className="tc-progress-bar">
+                                        <div
+                                            className="tc-progress-fill"
+                                            style={{ width: `${Math.max(0, Math.min(100, enrollment.section.syllabusCompletion ?? 0))}%` }}
+                                        ></div>
                                     </div>
                                 </div>
 

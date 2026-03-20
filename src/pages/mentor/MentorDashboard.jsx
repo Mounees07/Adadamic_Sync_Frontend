@@ -75,6 +75,8 @@ const MentorDashboard = () => {
     const [isViewingBoard, setIsViewingBoard] = useState(false);
     const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
     const [isNewCheckInModalOpen, setIsNewCheckInModalOpen] = useState(false);
+    const [boardLabelFilter, setBoardLabelFilter] = useState('ALL');
+    const [showBoardFilter, setShowBoardFilter] = useState(false);
     const [checkInData, setCheckInData] = useState({
         mentee: '',
         date: new Date().toISOString().split('T')[0],
@@ -223,7 +225,8 @@ const MentorDashboard = () => {
         const isFacultyTask = activeTab === 'Faculty';
         return tasks.filter(t =>
             t.column.toLowerCase() === colName.toLowerCase() &&
-            (t.isFacultyTask === isFacultyTask || t.isFacultyTask === undefined)
+            (t.isFacultyTask === isFacultyTask || t.isFacultyTask === undefined) &&
+            (boardLabelFilter === 'ALL' || (t.labels || []).includes(boardLabelFilter))
         );
     };
 
@@ -1706,7 +1709,32 @@ const MentorDashboard = () => {
                             <button className="view-btn"><List size={14} /> List</button>
                             <button className="view-btn active"><LayoutGrid size={14} /> Board</button>
                         </div>
-                        <button className="filter-btn-board"><Filter size={14} /> Filters</button>
+                        <div style={{ position: 'relative' }}>
+                            <button className="filter-btn-board" onClick={() => setShowBoardFilter(v => !v)}>
+                                <Filter size={14} /> Filters {boardLabelFilter !== 'ALL' && `(${boardLabelFilter})`}
+                            </button>
+                            {showBoardFilter && (
+                                <div style={{
+                                    position: 'absolute', top: '110%', right: 0, zIndex: 99,
+                                    background: 'var(--bg-card)', border: '1px solid var(--glass-border)',
+                                    borderRadius: '12px', padding: '8px', minWidth: '160px',
+                                    boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                                }}>
+                                    {['ALL', 'PRIORITY', 'MEETING', 'REVIEW', 'ADMIN', 'URGENT'].map(lbl => (
+                                        <button key={lbl} onClick={() => { setBoardLabelFilter(lbl); setShowBoardFilter(false); }}
+                                            style={{
+                                                display: 'block', width: '100%', textAlign: 'left',
+                                                padding: '8px 12px', background: boardLabelFilter === lbl ? 'var(--primary)' : 'transparent',
+                                                color: boardLabelFilter === lbl ? 'white' : 'var(--text-primary)',
+                                                border: 'none', borderRadius: '8px', cursor: 'pointer',
+                                                fontSize: '0.85rem', fontWeight: boardLabelFilter === lbl ? 700 : 400
+                                            }}>
+                                            {lbl === 'ALL' ? 'All Tasks' : lbl}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <button className="add-task-btn-top" onClick={() => openCreateTaskModal('Upcoming')}><Plus size={16} /> New Task</button>
                     </div>
                 </div>

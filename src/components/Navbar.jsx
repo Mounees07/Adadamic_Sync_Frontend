@@ -113,13 +113,15 @@ const Navbar = ({ toggleSidebar }) => {
     const getRoleHome = () => {
         switch (userData?.role) {
             case 'ADMIN': return '/admin/dashboard';
+            case 'PLACEMENT_COORDINATOR': return '/placement-coordinator/dashboard';
             default: return '/dashboard';
         }
     };
 
     const isHomePage = location.pathname === getRoleHome() ||
         (userData?.role !== 'ADMIN' && location.pathname === '/dashboard') ||
-        (userData?.role === 'ADMIN' && location.pathname === '/admin/dashboard');
+        (userData?.role === 'ADMIN' && location.pathname === '/admin/dashboard') ||
+        (userData?.role === 'PLACEMENT_COORDINATOR' && location.pathname === '/placement-coordinator/dashboard');
 
     return (
         <>

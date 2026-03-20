@@ -11,6 +11,8 @@ const AdminStudentList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedStudents, setSelectedStudents] = useState([]);
+    const [deptFilter, setDeptFilter] = useState('ALL');
+    const [showFilterMenu, setShowFilterMenu] = useState(false);
     const itemsPerPage = 8;
 
     // Modal State
@@ -58,11 +60,28 @@ const AdminStudentList = () => {
         }
     };
 
+    const departments = [...new Set(students.map(s => s.department).filter(Boolean))];
+
     const filteredStudents = students.filter(student =>
-        (student.fullName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        ((student.fullName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (student.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (student.rollNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+        (student.rollNumber?.toLowerCase() || '').includes(searchTerm.toLowerCase())) &&
+        (deptFilter === 'ALL' || student.department === deptFilter)
     );
+
+    const handleExportCSV = () => {
+        const headers = ['Name', 'Email', 'Roll No', 'Department', 'Semester', 'Section', 'Phone', 'Address'];
+        const rows = filteredStudents.map(s => [
+            s.fullName || '', s.email || '', s.rollNumber || '',
+            s.department || '', s.semester || '', s.section || '',
+            s.mobileNumber || '', s.address || ''
+        ]);
+        const csv = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'students_list.csv'; a.click();
+        URL.revokeObjectURL(url);
+    };
 
     const totalPages = Math.ceil(filteredStudents.length / itemsPerPage);
     const paginatedStudents = filteredStudents.slice(
@@ -191,10 +210,33 @@ const AdminStudentList = () => {
                         />
                     </div>
                     {/* Action Buttons */}
-                    <button className="action-btn-yellow">
-                        <SlidersHorizontal size={24} />
-                    </button>
-                    <button className="action-btn-yellow">
+                    <div style={{ position: 'relative' }}>
+                        <button className="action-btn-yellow" title="Filter by Department" onClick={() => setShowFilterMenu(v => !v)}>
+                            <SlidersHorizontal size={24} />
+                        </button>
+                        {showFilterMenu && (
+                            <div style={{
+                                position: 'absolute', top: '110%', right: 0, zIndex: 99,
+                                background: 'var(--bg-card)', border: '1px solid var(--glass-border)',
+                                borderRadius: '12px', padding: '8px', minWidth: '180px',
+                                boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                            }}>
+                                {['ALL', ...departments].map(dept => (
+                                    <button key={dept} onClick={() => { setDeptFilter(dept); setShowFilterMenu(false); setCurrentPage(1); }}
+                                        style={{
+                                            display: 'block', width: '100%', textAlign: 'left',
+                                            padding: '8px 12px', background: deptFilter === dept ? 'var(--primary)' : 'transparent',
+                                            color: deptFilter === dept ? 'white' : 'var(--text-primary)',
+                                            border: 'none', borderRadius: '8px', cursor: 'pointer',
+                                            fontSize: '0.85rem', fontWeight: deptFilter === dept ? 700 : 400
+                                        }}>
+                                        {dept === 'ALL' ? 'All Departments' : dept}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button className="action-btn-yellow" title="Export CSV" onClick={handleExportCSV}>
                         <Filter size={24} />
                     </button>
                     <button

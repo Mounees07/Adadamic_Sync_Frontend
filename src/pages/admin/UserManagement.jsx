@@ -10,6 +10,8 @@ const UserManagement = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedUsers, setSelectedUsers] = useState([]);
+    const [roleFilter, setRoleFilter] = useState('ALL');
+    const [showFilterMenu, setShowFilterMenu] = useState(false);
     const itemsPerPage = 8;
 
     const [showModal, setShowModal] = useState(false);
@@ -23,7 +25,7 @@ const UserManagement = () => {
     const fetchUsers = async () => {
         setLoading(true);
         try {
-            const roles = ['TEACHER', 'MENTOR', 'HOD', 'ADMIN', 'COE', 'PRINCIPAL', 'GATE_SECURITY', 'STUDENT'];
+            const roles = ['TEACHER', 'MENTOR', 'HOD', 'ADMIN', 'COE', 'PRINCIPAL', 'GATE_SECURITY', 'PLACEMENT_COORDINATOR', 'STUDENT'];
             const promises = roles.map(role => api.get(`/users/role/${role}`).catch(() => ({ data: [] })));
             const results = await Promise.all(promises);
             const allUsers = results.flatMap(r => r.data).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -51,10 +53,29 @@ const UserManagement = () => {
     };
 
     const filteredUsers = users.filter(user =>
-        (user.fullName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+        ((user.fullName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
         (user.email?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-        (user.role?.toLowerCase() || '').includes(searchTerm.toLowerCase())
+        (user.role?.toLowerCase() || '').includes(searchTerm.toLowerCase())) &&
+        (roleFilter === 'ALL' || user.role === roleFilter)
     );
+
+    const handleExportCSV = () => {
+        const headers = ['Name', 'Email', 'Role', 'Department', 'Roll Number', 'Phone', 'Joining Year'];
+        const rows = filteredUsers.map(u => [
+            u.fullName || '',
+            u.email || '',
+            u.role || '',
+            u.department || '',
+            u.rollNumber || '',
+            u.mobileNumber || '',
+            u.admissionYear || new Date(u.createdAt || Date.now()).toLocaleDateString()
+        ]);
+        const csvContent = [headers, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'users_export.csv'; a.click();
+        URL.revokeObjectURL(url);
+    };
 
     const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
     const paginatedUsers = filteredUsers.slice(
@@ -132,8 +153,35 @@ const UserManagement = () => {
                             className="search-input"
                         />
                     </div>
-                    <button className="action-btn-yellow"><SlidersHorizontal size={24} /></button>
-                    <button className="action-btn-yellow"><Filter size={24} /></button>
+                    <div style={{ position: 'relative' }}>
+                        <button className="action-btn-yellow" title="Filter by Role" onClick={() => setShowFilterMenu(v => !v)}>
+                            <SlidersHorizontal size={24} />
+                        </button>
+                        {showFilterMenu && (
+                            <div style={{
+                                position: 'absolute', top: '110%', right: 0, zIndex: 99,
+                                background: 'var(--bg-card)', border: '1px solid var(--glass-border)',
+                                borderRadius: '12px', padding: '8px', minWidth: '160px',
+                                boxShadow: '0 8px 24px rgba(0,0,0,0.2)'
+                            }}>
+                                {['ALL', 'STUDENT', 'TEACHER', 'MENTOR', 'HOD', 'ADMIN', 'COE', 'GATE_SECURITY', 'PLACEMENT_COORDINATOR'].map(role => (
+                                    <button key={role} onClick={() => { setRoleFilter(role); setShowFilterMenu(false); setCurrentPage(1); }}
+                                        style={{
+                                            display: 'block', width: '100%', textAlign: 'left',
+                                            padding: '8px 12px', background: roleFilter === role ? 'var(--primary)' : 'transparent',
+                                            color: roleFilter === role ? 'white' : 'var(--text-primary)',
+                                            border: 'none', borderRadius: '8px', cursor: 'pointer',
+                                            fontSize: '0.85rem', fontWeight: roleFilter === role ? 700 : 400
+                                        }}>
+                                        {role === 'ALL' ? 'All Roles' : role}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                    <button className="action-btn-yellow" title="Export Users CSV" onClick={handleExportCSV}>
+                        <Filter size={24} />
+                    </button>
                     <button className="action-btn-yellow large" onClick={openAddModal}><Plus size={28} /></button>
                 </div>
             </div>
